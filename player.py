@@ -11,6 +11,12 @@ class Player:
         self.speed = speed
         self.rot_speed = rot_speed
 
+        self.health = 100
+        self.mana = 100
+        self.current_spell = "Firebolt"
+
+        self.is_moving = False
+
     def movement(self):
         keys = pygame.key.get_pressed()
 
@@ -42,6 +48,7 @@ class Player:
         if keys[pygame.K_d]:
             self.angle += self.rot_speed
 
+        self.is_moving = dx != 0 or dy != 0
         self.move_with_collision(dx, dy)
 
     def move_with_collision(self, dx, dy):
