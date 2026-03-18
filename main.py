@@ -6,6 +6,7 @@ from hud import draw_hud, load_hud, get_fullscreen_button_rect
 from player import Player
 from raycasting import ray_casting
 from weapon import Weapon
+from staff import Staff
 from settings import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
@@ -91,7 +92,9 @@ def main():
     )
 
     sprites = create_plant_sprites(15)
+
     weapon = Weapon()
+    staff = Staff()
 
     running = True
     while running:
@@ -117,13 +120,16 @@ def main():
                         pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SCALED | pygame.FULLSCREEN)
 
         player.movement()
+
         weapon.update(dt, player)
+        staff.update(dt, player)
 
         draw_background(screen, sky_texture, grass_texture, player)
 
         depth_buffer = ray_casting(screen, player, textures)
         render_sprites(screen, player, sprites, depth_buffer)
         weapon.draw(screen)
+        staff.draw(screen)
         draw_hud(screen, player)
 
         pygame.display.flip()

@@ -32,3 +32,12 @@
 - [ ] Multiple weapons
 - [ ] Wave system
 - [ ] Score system
+
+## 🥶 IMPORTANT IMPLEMENTATION
+- [ ] Enemy damage
+- [ ] More enemies
+- [ ] After 5 waves special enemy
+- [ ] Ammo, reload 
+- [ ] Add card implementation
+
+- [ ] Due Friday - Finish project

@@ -67,7 +67,7 @@ def draw_hud(screen, player):
     text_y = hud_y - 30
 
     draw_text(screen, font, f"HP: {player.health}", (255, 70, 70), 80, text_y)
-    draw_text(screen, font, f"MP: {player.mana}", (80, 170, 255), 300, text_y)
+    draw_text(screen, font, f"MP: {player.mana}", (80, 170, 255), 200, text_y)
     draw_text(screen, font, f"Spell: {player.current_spell}", (255, 245, 140), 720, text_y)
 
     draw_fullscreen_button(screen)
