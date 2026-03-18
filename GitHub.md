@@ -10,3 +10,8 @@ git switch -c reviews-page
 git add .
 git commit -m "Added reviews page"
 git push -u origin reviews-page
+
+# change your current setup to include all files
+
+git fetch origin
+git merge origin

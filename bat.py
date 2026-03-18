@@ -145,11 +145,18 @@ class Enemy:
         self.update_animation(dt)
 
     def take_damage(self, amount):
+        if not self.alive:
+            return
+
         self.health -= amount
         self.state = "hurt"
         self.anim_index = 0.0
+
         if self.health <= 0:
+            self.health = 0
             self.alive = False
+            self.state = "die"
+            self.anim_index = 0.0
 
     def draw(self, screen, player):
         """Draw enemy as pseudo-3D sprite relative to player"""

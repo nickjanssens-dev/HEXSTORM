@@ -7,7 +7,7 @@ from player import Player
 from raycasting import ray_casting
 from weapon import Weapon
 from staff import Staff
-from bat import Enemy   # change to: from bat import Enemy  if your file is bat.py
+from bat import Enemy
 from settings import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
@@ -50,7 +50,6 @@ def create_plant_sprites(amount=15):
         "assets/textures/sprites/plant_fern.png"
     ).convert_alpha()
 
-    # Crop to visible plant area
     plant_texture = plant_texture.subsurface((253, 232, 502, 512)).copy()
 
     for _ in range(amount):
@@ -106,7 +105,6 @@ def draw_game_over(screen):
 def main():
     pygame.init()
 
-    # Initial screen setup
     flags = pygame.SCALED
     if FULLSCREEN:
         flags |= pygame.FULLSCREEN
@@ -116,7 +114,6 @@ def main():
     clock = pygame.time.Clock()
 
     load_hud()
-
     textures, sky_texture, grass_texture = load_textures()
 
     start_x, start_y = get_free_pos()
@@ -129,12 +126,11 @@ def main():
     )
 
     sprites = create_plant_sprites(15)
-
     bats = create_bats(3)
+
     weapon = Weapon()
     staff = Staff()
 
-    # Wave system
     wave = 1
     kills = 0
     game_over = False
@@ -147,8 +143,8 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Left click
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
                     if get_fullscreen_button_rect().collidepoint(event.pos):
                         if screen.get_flags() & pygame.FULLSCREEN:
                             screen = pygame.display.set_mode(
@@ -161,7 +157,7 @@ def main():
                                 pygame.SCALED | pygame.FULLSCREEN
                             )
 
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F11:
                     if screen.get_flags() & pygame.FULLSCREEN:
                         screen = pygame.display.set_mode(
@@ -174,20 +170,29 @@ def main():
                             pygame.SCALED | pygame.FULLSCREEN
                         )
 
-        player.movement()
-
-        weapon.update(dt, player)
-        staff.update(dt, player)
-                if event.key == pygame.K_r and game_over:
+                elif event.key == pygame.K_r and game_over:
                     main()
                     return
 
         if not game_over:
             player.movement()
-            weapon.update(dt, player)
+            weapon.update(dt, player, bats)
+            staff.update(dt, player)
 
             for bat in bats:
                 bat.update(player, dt)
+
+            # Count dead bats before removing them
+            dead_bats = [bat for bat in bats if not bat.alive]
+            kills += len(dead_bats)
+
+            # Remove dead bats
+            bats = [bat for bat in bats if bat.alive]
+
+            # New wave when all bats are gone
+            if len(bats) == 0:
+                wave += 1
+                bats = create_bats(2 + wave)
 
             if player.health <= 0:
                 game_over = True
@@ -203,6 +208,9 @@ def main():
         weapon.draw(screen)
         staff.draw(screen)
         draw_hud(screen, player, wave=wave, kills=kills, game_over=game_over)
+
+        if game_over:
+            draw_game_over(screen)
 
         pygame.display.flip()
 
