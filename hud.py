@@ -24,7 +24,7 @@ def draw_crosshair(screen):
     )
 
 
-def draw_hud(screen, player):
+def draw_hud(screen, player, wave):
     hud_height = 80
     hud_rect = pygame.Rect(0, SCREEN_HEIGHT - hud_height, SCREEN_WIDTH, hud_height)
 
@@ -33,9 +33,11 @@ def draw_hud(screen, player):
     font = pygame.font.SysFont("consolas", 24)
 
     health_text = font.render(f"HP: {player.health}", True, (255, 50, 50))
+    wave_text = font.render(f"WAVE: {wave}", True, (255, 255, 255))
     mana_text = font.render(f"MP: {player.mana}", True, (50, 150, 255))
     spell_text = font.render(f"Spell: {player.current_spell}", True, (255, 255, 100))
 
     screen.blit(health_text, (20, SCREEN_HEIGHT - 60))
-    screen.blit(mana_text, (150, SCREEN_HEIGHT - 60))
-    screen.blit(spell_text, (300, SCREEN_HEIGHT - 60))
+    screen.blit(wave_text, (150, SCREEN_HEIGHT - 60))
+    screen.blit(mana_text, (300, SCREEN_HEIGHT - 60))
+    screen.blit(spell_text, (500, SCREEN_HEIGHT - 60))
