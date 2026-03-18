@@ -196,9 +196,6 @@ def main():
         weapon.draw(screen)
         draw_hud(screen, player, wave=wave, kills=kills, game_over=game_over)
 
-        if game_over:
-            draw_game_over(screen)
-
         pygame.display.flip()
 
     pygame.quit()
