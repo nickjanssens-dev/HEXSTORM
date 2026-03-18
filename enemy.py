@@ -7,6 +7,7 @@ class Enemy:
     # Class-level cache for animations and sounds to avoid redundant loading
     _animations_cache = {}
     _attack_sound = None
+    _fly_sound = None
 
     def __init__(self, x, y):
         self.x = x
@@ -33,12 +34,20 @@ class Enemy:
                 "wakeup": self._load_sheet("Bat-WakeUp.png"),
             }
             
-            # Load attack sound
+            # Try to load sounds
             try:
-                sound_path = os.path.join("assets", "textures", "enemy", "bat", "attack.wav")
-                Enemy._attack_sound = pygame.mixer.Sound(sound_path)
-            except (pygame.error, FileNotFoundError) as e:
-                print(f"Warning: Could not load attack sound: {e}")
+                bat_dir = os.path.join("assets", "textures", "enemy", "bat")
+                
+                att_path = os.path.join(bat_dir, "attack.wav")
+                if os.path.exists(att_path):
+                    Enemy._attack_sound = pygame.mixer.Sound(att_path)
+                
+                fly_path = os.path.join(bat_dir, "fly.wav")
+                if os.path.exists(fly_path):
+                    Enemy._fly_sound = pygame.mixer.Sound(fly_path)
+                    Enemy._fly_sound.set_volume(0.3) # Subtle flap sound
+            except (pygame.error, Exception) as e:
+                print(f"Warning: Could not load enemy sounds: {e}")
 
         self.state = "idle"
         self.anim_index = 0.0
@@ -50,9 +59,8 @@ class Enemy:
         path = os.path.join("assets", "textures", "enemy", "bat", filename)
         try:
             sheet = pygame.image.load(path).convert_alpha()
-        except pygame.error as e:
+        except (pygame.error, FileNotFoundError) as e:
             print(f"Error loading {path}: {e}")
-            # Return a small magenta surface as fallback
             fail = pygame.Surface((64, 64))
             fail.fill((255, 0, 255))
             return [fail]
@@ -61,7 +69,6 @@ class Enemy:
         frames = []
         for i in range(0, sheet_w, self.frame_size):
             try:
-                # Ensure we don't exceed the sheet width
                 width = min(self.frame_size, sheet_w - i)
                 if width <= 0: break
                 frame = sheet.subsurface((i, 0, width, sheet_h))
@@ -80,6 +87,9 @@ class Enemy:
                 self.anim_index = len(frames) - 1
             else:
                 self.anim_index = 0
+                # Play flight sound on wings flap (reset to frame 0)
+                if (self.state == "idle" or self.state == "run") and Enemy._fly_sound:
+                    Enemy._fly_sound.play()
                 
         self.current_sprite = frames[int(self.anim_index)]
         
@@ -95,34 +105,32 @@ class Enemy:
         else:
             dx = player.x - self.x
             dy = player.y - self.y
-            distance = math.hypot(dx, dy)
-            distance_tiles = distance / TILE_SIZE
-            
-            if distance_tiles > 5:
+            distance_tiles = math.hypot(dx, dy) / TILE_SIZE
+
+            if distance_tiles > 10:
                 new_state = "idle"
             elif distance_tiles > 0.5:
                 new_state = "run"
             else:
                 new_state = "attack"
-
-        if self.state != new_state:
+        
+        if new_state != self.state:
             self.state = new_state
             self.anim_index = 0.0
 
     def update(self, player, dt):
-        """Update enemy logic using delta time (dt)"""
+        """Update enemy AI using delta time (dt)"""
         self.update_state(player)
 
         # Update attack timer
         if self.attack_timer > 0:
             self.attack_timer -= dt
 
-        # Simple AI: move toward player using dt
+        # Simple AI: move toward player
         if self.alive:
             if self.state == "attack" and self.attack_timer <= 0:
                 player.take_damage(self.damage)
                 self.attack_timer = self.attack_cooldown
-                # Play attack sound if loaded
                 if Enemy._attack_sound:
                     Enemy._attack_sound.play()
 
@@ -170,8 +178,8 @@ class Enemy:
 
         # Calculate sprite height using fish-eye corrected distance
         corrected_depth = distance * math.cos(angle_to_player)
-        if corrected_depth < 1:
-            corrected_depth = 1
+        if corrected_depth < 0.1: # Guard against division by near-zero
+            corrected_depth = 0.1
             
         sprite_height = (25 / corrected_depth) * DIST_TO_PROJ_PLANE
         
@@ -180,13 +188,11 @@ class Enemy:
         aspect_ratio = orig_w / orig_h
         sprite_width = sprite_height * aspect_ratio
         
-        # Guard against zero sizes
+        # Guard against zero or astronomical sizes
         if sprite_width < 1 or sprite_height < 1:
             return
-
-        # CAP sprite size
-        if sprite_height > SCREEN_HEIGHT * 2:
-            sprite_height = SCREEN_HEIGHT * 2
+        if sprite_height > SCREEN_HEIGHT * 3: # CAP huge sprites
+            sprite_height = SCREEN_HEIGHT * 3
             sprite_width = sprite_height * aspect_ratio
         
         # Scale the sprite
@@ -196,4 +202,7 @@ class Enemy:
             return
 
         screen_y = SCREEN_HEIGHT // 2 - sprite_scaled.get_height() // 2
-        screen.blit(sprite_scaled, (screen_x - sprite_scaled.get_width() // 2, screen_y))
+        
+        # Blit with final safety coords check
+        if -sprite_scaled.get_width() < screen_x < SCREEN_WIDTH + sprite_scaled.get_width():
+            screen.blit(sprite_scaled, (screen_x - sprite_scaled.get_width() // 2, screen_y))
