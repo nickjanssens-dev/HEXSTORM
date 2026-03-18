@@ -6,6 +6,7 @@ from hud import draw_hud, load_hud, get_fullscreen_button_rect
 from player import Player
 from raycasting import ray_casting
 from weapon import Weapon
+from staff import Staff
 from bat import Enemy   # change to: from bat import Enemy  if your file is bat.py
 from settings import (
     SCREEN_WIDTH,
@@ -128,8 +129,10 @@ def main():
     )
 
     sprites = create_plant_sprites(15)
+
     bats = create_bats(3)
     weapon = Weapon()
+    staff = Staff()
 
     # Wave system
     wave = 1
@@ -171,6 +174,10 @@ def main():
                             pygame.SCALED | pygame.FULLSCREEN
                         )
 
+        player.movement()
+
+        weapon.update(dt, player)
+        staff.update(dt, player)
                 if event.key == pygame.K_r and game_over:
                     main()
                     return
@@ -194,6 +201,7 @@ def main():
             bat.draw(screen, player)
 
         weapon.draw(screen)
+        staff.draw(screen)
         draw_hud(screen, player, wave=wave, kills=kills, game_over=game_over)
 
         pygame.display.flip()

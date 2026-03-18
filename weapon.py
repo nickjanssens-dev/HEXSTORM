@@ -1,6 +1,6 @@
 import os
-import pygame
 import math
+import pygame
 
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
 from map import game_map
@@ -8,6 +8,7 @@ from map import game_map
 
 class Weapon:
     def __init__(self):
+        # 🔥 Weapon animation frames
         self.frames = [
             pygame.transform.scale(
                 pygame.image.load("assets/textures/weapon/the_blue_flame_first_frame.png").convert_alpha(),
@@ -23,15 +24,17 @@ class Weapon:
             ),
         ]
 
-        # Blast effect
+        # 💥 Blast effect
         blast_path = os.path.join("assets", "textures", "misc", "blast.png")
         self.blast_image = pygame.image.load(blast_path).convert_alpha()
         self.blast_image = pygame.transform.scale(self.blast_image, (240, 240))
 
+        # Animation state
         self.frame_index = 0
         self.animation_timer = 0
         self.animation_speed = 100
 
+        # Shooting
         self.is_shooting = False
         self.shoot_cooldown = 250
         self.last_shot_time = 0
@@ -49,11 +52,15 @@ class Weapon:
         self.bob_amount_x = 8
         self.bob_amount_y = 6
 
+    # ======================
+    # UPDATE
+    # ======================
     def update(self, dt, player):
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pressed()
         current_time = pygame.time.get_ticks()
 
+        # Shooting trigger
         if (keys[pygame.K_SPACE] or mouse[0]) and current_time - self.last_shot_time > self.shoot_cooldown:
             self.is_shooting = True
             self.last_shot_time = current_time
@@ -64,6 +71,7 @@ class Weapon:
             self.show_blast = True
             self.blast_timer = self.blast_duration
 
+        # Animation
         if self.is_shooting:
             self.animation_timer += dt
             if self.animation_timer >= self.animation_speed:
@@ -74,20 +82,24 @@ class Weapon:
                     self.frame_index = 0
                     self.is_shooting = False
                     self.hit_position = None
-
         else:
             self.frame_index = 0
 
+        # Blast timer
         if self.show_blast:
             self.blast_timer -= dt
             if self.blast_timer <= 0:
                 self.show_blast = False
 
+        # Bobbing
         if player.is_moving:
             self.bob_time += dt * self.bob_speed
         else:
             self.bob_time = 0
 
+    # ======================
+    # RAY HIT DETECTION
+    # ======================
     def shoot(self, player):
         angle = player.angle
         sin_a = math.sin(angle)
@@ -106,15 +118,21 @@ class Weapon:
 
         return None
 
+    # ======================
+    # DRAW WEAPON
+    # ======================
     def draw(self, screen):
         frame = self.frames[self.frame_index]
 
-        base_x = SCREEN_WIDTH // 2 - frame.get_width() // 2
+        # 👇 SHIFT LEFT HERE
+        base_x = SCREEN_WIDTH // 2 - frame.get_width() // 2 - 120
         base_y = SCREEN_HEIGHT - frame.get_height()
 
+        # Bobbing
         offset_x = math.sin(self.bob_time) * self.bob_amount_x
         offset_y = abs(math.cos(self.bob_time)) * self.bob_amount_y
 
+        # Shooting kickback
         if self.is_shooting:
             offset_y -= 12
 
@@ -123,17 +141,16 @@ class Weapon:
 
         screen.blit(frame, (weapon_x, weapon_y))
 
+        # Draw blast AFTER weapon
         if self.show_blast:
-            self.draw_blast(screen)
+            self.draw_blast(screen, weapon_x, weapon_y)
 
-    def draw_blast(self, screen):
-        # Horizontal shift → right
-        offset_x = 90  # increase for more right
-
-        # Vertical shift → up (further away)
-        offset_y = -60  # more negative = further away
-
-        blast_x = SCREEN_WIDTH // 2 - self.blast_image.get_width() // 2 + offset_x
-        blast_y = SCREEN_HEIGHT // 2 - self.blast_image.get_height() // 2 + offset_y
+    # ======================
+    # DRAW BLAST
+    # ======================
+    def draw_blast(self, screen, weapon_x, weapon_y):
+        # Position relative to weapon (🔥 correct way)
+        blast_x = weapon_x + 80     # tweak horizontal
+        blast_y = weapon_y - 140    # above barrel
 
         screen.blit(self.blast_image, (blast_x, blast_y))
