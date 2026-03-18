@@ -2,7 +2,7 @@ import pygame
 import random
 
 from background import draw_background
-from hud import draw_crosshair, draw_hud, load_hud
+from hud import draw_hud, load_hud, get_fullscreen_button_rect
 from player import Player
 from raycasting import ray_casting
 from weapon import Weapon
@@ -10,6 +10,7 @@ from settings import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     FPS,
+    FULLSCREEN,
     PLAYER_ANGLE,
     PLAYER_SPEED,
     PLAYER_ROT_SPEED,
@@ -66,7 +67,13 @@ def create_plant_sprites(amount=15):
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    # Initial screen setup
+    flags = pygame.SCALED
+    if FULLSCREEN:
+        flags |= pygame.FULLSCREEN
+
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags)
     pygame.display.set_caption("HEXSTORM - Raycasting Prototype")
     clock = pygame.time.Clock()
 
@@ -93,6 +100,21 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1: # Left click
+                    if get_fullscreen_button_rect().collidepoint(event.pos):
+                        # Toggle fullscreen
+                        if screen.get_flags() & pygame.FULLSCREEN:
+                            pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SCALED)
+                        else:
+                            pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SCALED | pygame.FULLSCREEN)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F11:
+                    # Toggle fullscreen
+                    if screen.get_flags() & pygame.FULLSCREEN:
+                        pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SCALED)
+                    else:
+                        pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SCALED | pygame.FULLSCREEN)
 
         player.movement()
         weapon.update(dt, player)
@@ -102,13 +124,11 @@ def main():
         depth_buffer = ray_casting(screen, player, textures)
         render_sprites(screen, player, sprites, depth_buffer)
         weapon.draw(screen)
-        draw_crosshair(screen)
         draw_hud(screen, player)
 
         pygame.display.flip()
 
     pygame.quit()
-
 
 if __name__ == "__main__":
     main()

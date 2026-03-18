@@ -4,6 +4,7 @@ import math
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 600
 FPS = 60
+FULLSCREEN = False
 
 # Map / world
 TILE_SIZE = 64
