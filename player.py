@@ -59,3 +59,7 @@ class Player:
             self.x = new_x
         if not is_wall(self.x, new_y):
             self.y = new_y
+
+    def take_damage(self, amount):
+        """Reduce player health and cap at 0"""
+        self.health = max(0, self.health - amount)
