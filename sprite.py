@@ -23,12 +23,17 @@ class Sprite:
 
 
 def render_sprites(screen, player, sprites, depth_buffer):
-    sprites.sort(
+    visible_sprites = [
+        sprite for sprite in sprites
+        if not hasattr(sprite, "alive") or sprite.alive
+    ]
+
+    visible_sprites.sort(
         key=lambda s: math.hypot(player.x - s.x, player.y - s.y),
         reverse=True
     )
 
-    for sprite in sprites:
+    for sprite in visible_sprites:
         dx = sprite.x - player.x
         dy = sprite.y - player.y
         distance = math.hypot(dx, dy)

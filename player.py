@@ -19,7 +19,14 @@ class Player:
         self.is_moving = False
         self.shooting = False
 
+        # ✅ NEW
+        self.alive = True
+
     def movement(self):
+        # ❗ Don't move if dead
+        if not self.alive:
+            return
+
         keys = pygame.key.get_pressed()
 
         sin_a = math.sin(self.angle)
@@ -28,7 +35,6 @@ class Player:
         dx = 0
         dy = 0
 
-        # Forward / backward
         if keys[pygame.K_UP]:
             dx += cos_a * self.speed
             dy += sin_a * self.speed
@@ -36,7 +42,6 @@ class Player:
             dx -= cos_a * self.speed
             dy -= sin_a * self.speed
 
-        # Strafe left / right
         if keys[pygame.K_LEFT]:
             dx += sin_a * self.speed
             dy -= cos_a * self.speed
@@ -44,7 +49,6 @@ class Player:
             dx -= sin_a * self.speed
             dy += cos_a * self.speed
 
-        # Rotate camera
         if keys[pygame.K_s]:
             self.angle -= self.rot_speed
         if keys[pygame.K_d]:
@@ -65,6 +69,15 @@ class Player:
             self.y = new_y
 
     def take_damage(self, amount):
+        if not self.alive:
+            return
+
         self.health -= amount
+
+        # Optional: clamp
         if self.health < 0:
             self.health = 0
+
+        # ✅ Death handling
+        if self.health == 0:
+            self.alive = False
