@@ -56,7 +56,7 @@ def draw_text(screen, font, text, color, x, y):
     screen.blit(main, (x, y + 1))
 
 
-def draw_hud(screen, player):
+def draw_hud(screen, player, wave=None, kills=None, game_over=False):
     hud_x = 0
     hud_y = SCREEN_HEIGHT - HUD_HEIGHT
 
@@ -71,3 +71,36 @@ def draw_hud(screen, player):
     draw_text(screen, font, f"Spell: {player.current_spell}", (255, 245, 140), 720, text_y)
 
     draw_fullscreen_button(screen)
+
+    # --- Draw wave/kills if provided ---
+    if wave is not None and kills is not None:
+        wave_text = font.render(f"WAVE: {wave}", True, (255, 255, 255))
+        kills_text = font.render(f"KILLS: {kills}", True, (255, 255, 255))
+        screen.blit(wave_text, (20, 20))
+        screen.blit(kills_text, (20, 50))
+
+    # --- Game Over Overlay ---
+    if game_over:
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 180))
+        screen.blit(overlay, (0, 0))
+
+        font_large = pygame.font.SysFont("Arial", 80, bold=True)
+        font_small = pygame.font.SysFont("Arial", 40)
+
+        text_game_over = font_large.render("GAME OVER", True, (255, 0, 0))
+        text_stats = font_small.render(f"WAVE: {wave} | KILLS: {kills}", True, (255, 255, 255))
+        text_restart = font_small.render("PRESS 'R' TO RESTART", True, (200, 200, 200))
+
+        screen.blit(
+            text_game_over,
+            (SCREEN_WIDTH // 2 - text_game_over.get_width() // 2, SCREEN_HEIGHT // 2 - 100)
+        )
+        screen.blit(
+            text_stats,
+            (SCREEN_WIDTH // 2 - text_stats.get_width() // 2, SCREEN_HEIGHT // 2)
+        )
+        screen.blit(
+            text_restart,
+            (SCREEN_WIDTH // 2 - text_restart.get_width() // 2, SCREEN_HEIGHT // 2 + 100)
+        )

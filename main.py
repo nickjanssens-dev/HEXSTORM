@@ -93,6 +93,11 @@ def main():
     sprites = create_plant_sprites(15)
     weapon = Weapon()
 
+    # Wave system
+    wave = 1
+    kills = 0
+    game_over = False
+
     running = True
     while running:
         dt = clock.tick(FPS)
@@ -124,7 +129,7 @@ def main():
         depth_buffer = ray_casting(screen, player, textures)
         render_sprites(screen, player, sprites, depth_buffer)
         weapon.draw(screen)
-        draw_hud(screen, player)
+        draw_hud(screen, player, wave=wave, kills=kills, game_over=game_over)
 
         pygame.display.flip()
 
