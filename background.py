@@ -3,10 +3,8 @@ import pygame
 
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, HALF_FOV, DELTA_ANGLE, TILE_SIZE, SCALE
 
-
 # cache
 _sky_scaled = None
-
 
 def draw_background(screen, sky_texture, grass_texture, player):
     global _sky_scaled

@@ -1,7 +1,6 @@
 import random
 from settings import TILE_SIZE
 
-
 def generate_map(width=20, height=20, num_rooms=8):
     # Initialize with walls
     new_map = [[1 for _ in range(width)] for _ in range(height)]
@@ -34,9 +33,7 @@ def generate_map(width=20, height=20, num_rooms=8):
 
     return new_map
 
-
 game_map = generate_map()
-
 
 def is_wall(x, y):
     map_x = int(x // TILE_SIZE)
@@ -45,7 +42,6 @@ def is_wall(x, y):
     if 0 <= map_y < len(game_map) and 0 <= map_x < len(game_map[0]):
         return game_map[map_y][map_x]
     return 1
-
 
 def get_free_pos():
     while True:

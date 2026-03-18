@@ -32,7 +32,6 @@ def draw_fullscreen_button(screen):
     # Bottom-right corner
     pygame.draw.lines(screen, (255, 255, 255), False, [(rect.right - m - l, rect.bottom - m), (rect.right - m, rect.bottom - m), (rect.right - m, rect.bottom - m - l)], 2)
 
-
 def load_hud():
     global HUD_IMAGE
 
@@ -54,7 +53,6 @@ def draw_text(screen, font, text, color, x, y):
     screen.blit(main, (x, y))
     screen.blit(main, (x + 1, y))
     screen.blit(main, (x, y + 1))
-
 
 def draw_hud(screen, player, wave=None, kills=None, game_over=False):
     hud_x = 0

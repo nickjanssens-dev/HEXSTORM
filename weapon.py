@@ -5,7 +5,6 @@ import pygame
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
 from map import game_map
 
-
 class Weapon:
     def __init__(self):
         # Weapon animation frames

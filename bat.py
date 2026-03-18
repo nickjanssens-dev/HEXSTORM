@@ -3,7 +3,6 @@ import math
 import os
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, DIST_TO_PROJ_PLANE, TILE_SIZE
 
-
 class Enemy:
     # Class-level cache for animations and sounds to avoid redundant loading
     _animations_cache = {}

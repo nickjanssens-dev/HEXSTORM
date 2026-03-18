@@ -3,7 +3,6 @@ import pygame
 
 from map import is_wall
 
-
 class Player:
     def __init__(self, x, y, angle, speed, rot_speed):
         self.x = x
@@ -19,7 +18,7 @@ class Player:
         self.is_moving = False
         self.shooting = False
 
-        # ✅ NEW
+        # NEW
         self.alive = True
 
     def movement(self):
@@ -78,6 +77,6 @@ class Player:
         if self.health < 0:
             self.health = 0
 
-        # ✅ Death handling
+        # Death handling
         if self.health == 0:
             self.alive = False
