@@ -1,15 +1,15 @@
 import math
 import pygame
 
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT, HALF_FOV, DELTA_ANGLE, TILE_SIZE, SCALE
+
 
 # cache
 _sky_scaled = None
-_grass_tile = None
 
 
 def draw_background(screen, sky_texture, grass_texture, player):
-    global _sky_scaled, _grass_tile
+    global _sky_scaled
 
     half_height = SCREEN_HEIGHT // 2
 
@@ -17,18 +17,45 @@ def draw_background(screen, sky_texture, grass_texture, player):
     if _sky_scaled is None:
         _sky_scaled = pygame.transform.scale(sky_texture, (SCREEN_WIDTH, half_height))
 
-    # Prepare grass once: crop instead of scaling whole texture
-    if _grass_tile is None:
-        tile_size = 512
-        _grass_tile = grass_texture.subsurface((0, 0, tile_size, tile_size)).copy()
-
     # Sky parallax
     sky_offset = int(-player.angle * (SCREEN_WIDTH / (math.pi / 2))) % SCREEN_WIDTH
     screen.blit(_sky_scaled, (sky_offset, 0))
     screen.blit(_sky_scaled, (sky_offset - SCREEN_WIDTH, 0))
 
-    # Grass floor
-    tile_size = _grass_tile.get_width()
-    for y in range(half_height, SCREEN_HEIGHT, tile_size):
-        for x in range(0, SCREEN_WIDTH, tile_size):
-            screen.blit(_grass_tile, (x, y))
+    # Perspective Grass Floor Casting
+    # Performance optimization: Render in blocks matching raycaster scale
+    # This ensures a balance between visual quality and FPS
+    floor_step = 6  # Vertical resolution of the floor
+    tex_size = grass_texture.get_width()
+
+    for y in range(half_height, SCREEN_HEIGHT, floor_step):
+        # distance = (horizon_pos * world_tile_size) / (relative_y)
+        # Using a small offset to avoid division by zero
+        dist = (half_height * TILE_SIZE) / (y - half_height + 0.01)
+
+        # Distance shading factor
+        shade = max(60, 255 - int(dist * 0.45))
+        shade_mult = shade / 255.0
+
+        for x in range(0, SCREEN_WIDTH, SCALE):
+            # ray_angle = player_angle - half_fov + current_column * delta_angle
+            ray_angle = player.angle - HALF_FOV + (x // SCALE) * DELTA_ANGLE
+
+            # Calculate world coordinates
+            wx = player.x + dist * math.cos(ray_angle)
+            wy = player.y + dist * math.sin(ray_angle)
+
+            # Map to texture coordinates (tiled)
+            tx = int(wx) % tex_size
+            ty = int(wy) % tex_size
+
+            color = grass_texture.get_at((tx, ty))
+            
+            # Apply shading
+            final_color = (
+                int(color.r * shade_mult),
+                int(color.g * shade_mult),
+                int(color.b * shade_mult)
+            )
+
+            pygame.draw.rect(screen, final_color, (x, y, SCALE, floor_step))
