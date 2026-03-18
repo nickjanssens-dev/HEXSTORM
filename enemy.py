@@ -4,8 +4,9 @@ import os
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, DIST_TO_PROJ_PLANE, TILE_SIZE
 
 class Enemy:
-    # Class-level cache for animations to avoid loading files multiple times
+    # Class-level cache for animations and sounds to avoid redundant loading
     _animations_cache = {}
+    _attack_sound = None
 
     def __init__(self, x, y):
         self.x = x
@@ -14,13 +15,13 @@ class Enemy:
         self.health = 100
         self.alive = True
         self.damage = 10
-        self.attack_cooldown = 3000  # ms (2 seconds)
+        self.attack_cooldown = 2000  # ms (2 seconds)
         self.attack_timer = 0
 
         # Each frame in the source assets is 64x64
         self.frame_size = 64
 
-        # Load animations only if not already cached
+        # Load assets only if not already cached
         if not Enemy._animations_cache:
             Enemy._animations_cache = {
                 "idle": self._load_sheet("Bat-IdleFly.png"),
@@ -31,6 +32,13 @@ class Enemy:
                 "sleep": self._load_sheet("Bat-Sleep.png"),
                 "wakeup": self._load_sheet("Bat-WakeUp.png"),
             }
+            
+            # Load attack sound
+            try:
+                sound_path = os.path.join("assets", "textures", "enemy", "bat", "attack.wav")
+                Enemy._attack_sound = pygame.mixer.Sound(sound_path)
+            except (pygame.error, FileNotFoundError) as e:
+                print(f"Warning: Could not load attack sound: {e}")
 
         self.state = "idle"
         self.anim_index = 0.0
@@ -114,6 +122,9 @@ class Enemy:
             if self.state == "attack" and self.attack_timer <= 0:
                 player.take_damage(self.damage)
                 self.attack_timer = self.attack_cooldown
+                # Play attack sound if loaded
+                if Enemy._attack_sound:
+                    Enemy._attack_sound.play()
 
             dx = player.x - self.x
             dy = player.y - self.y
