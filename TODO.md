@@ -5,11 +5,11 @@
 - [x] Basic raycasting
 - [x] Player movement
 - [x] Map
-- [ ] Mouse / rotation improvements
+- [x] Mouse / rotation improvements
 - [ ] Collision refinement
 
 ## 🔫 Combat
-- [ ] Add shooting (laser / hitscan)
+- [x] Add shooting (laser / hitscan)
 - [ ] Add projectile system (fireball)
 - [ ] Weapon switching
 

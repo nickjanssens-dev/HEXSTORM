@@ -7,12 +7,13 @@ FPS = 60
 
 # Map / world
 TILE_SIZE = 64
+TEXTURE_SIZE = 64
 
 # Raycasting
-FOV = math.pi / 3  # 60 degrees
+FOV = math.pi / 3
 HALF_FOV = FOV / 2
 NUM_RAYS = 200
-MAX_DEPTH = 800
+MAX_DEPTH = TILE_SIZE * 20
 DELTA_ANGLE = FOV / NUM_RAYS
 DIST_TO_PROJ_PLANE = (SCREEN_WIDTH // 2) / math.tan(HALF_FOV)
 SCALE = SCREEN_WIDTH // NUM_RAYS
@@ -25,14 +26,14 @@ PLAYER_SPEED = 3
 PLAYER_ROT_SPEED = 0.04
 
 # Colors
-SKY_COLOR = (100, 150, 255)   # bright sky blue
-FLOOR_COLOR = (60, 120, 60)   # grass green
+SKY_COLOR = (100, 150, 255)
+FLOOR_COLOR = (60, 120, 60)
 CROSSHAIR_COLOR = (220, 220, 220)
 
 # Textures
 WALL_TEXTURE_PATH = "assets/textures/walls/wall_stone.png"
-TEXTURE_SIZE = 64
+POSTER_TEXTURE_PATH = "assets/textures/walls/wall_wanted_poster.png"
+HEXSTORM_TEXTURE_PATH = "assets/textures/walls/wall_hexstorm.png"
 
 SKY_TEXTURE_PATH = "assets/textures/sky_clouds.png"
 GRASS_TEXTURE_PATH = "assets/textures/grass.png"
-

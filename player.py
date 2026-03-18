@@ -16,6 +16,7 @@ class Player:
         self.current_spell = "Firebolt"
 
         self.is_moving = False
+        self.shooting = False
 
     def movement(self):
         keys = pygame.key.get_pressed()
@@ -26,7 +27,7 @@ class Player:
         dx = 0
         dy = 0
 
-        # Forward / backward (Arrow keys)
+        # Forward / backward
         if keys[pygame.K_UP]:
             dx += cos_a * self.speed
             dy += sin_a * self.speed
@@ -34,7 +35,7 @@ class Player:
             dx -= cos_a * self.speed
             dy -= sin_a * self.speed
 
-        # Left / right (Arrow keys)
+        # Strafe left / right
         if keys[pygame.K_LEFT]:
             dx += sin_a * self.speed
             dy -= cos_a * self.speed
@@ -42,11 +43,13 @@ class Player:
             dx -= sin_a * self.speed
             dy += cos_a * self.speed
 
-        # Rotate camera with S / D
+        # Rotate camera
         if keys[pygame.K_s]:
             self.angle -= self.rot_speed
         if keys[pygame.K_d]:
             self.angle += self.rot_speed
+
+        self.angle %= math.tau
 
         self.is_moving = dx != 0 or dy != 0
         self.move_with_collision(dx, dy)
