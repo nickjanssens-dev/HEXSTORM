@@ -14,7 +14,6 @@ from settings import (
     TEXTURE_SIZE,
 )
 
-
 def ray_casting(screen, player, textures):
     start_angle = player.angle - HALF_FOV
     depth_buffer = []

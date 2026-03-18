@@ -25,7 +25,6 @@ from settings import (
 from map import get_free_pos, game_map, TILE_SIZE
 from sprite import Sprite, render_sprites
 
-
 def load_textures():
     wall_texture = pygame.image.load(WALL_TEXTURE_PATH).convert()
     poster_texture = pygame.image.load(POSTER_TEXTURE_PATH).convert()
@@ -41,7 +40,6 @@ def load_textures():
     }
 
     return textures, sky_texture, grass_texture
-
 
 def create_plant_sprites(amount=15):
     sprites = []
@@ -65,7 +63,6 @@ def create_plant_sprites(amount=15):
 
     return sprites
 
-
 def create_bats(amount=3):
     bats = []
 
@@ -81,7 +78,6 @@ def create_bats(amount=3):
                 break
 
     return bats
-
 
 def draw_game_over(screen):
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -100,7 +96,6 @@ def draw_game_over(screen):
 
     screen.blit(game_over_text, game_over_rect)
     screen.blit(restart_text, restart_rect)
-
 
 def main():
     pygame.init()
@@ -215,7 +210,6 @@ def main():
         pygame.display.flip()
 
     pygame.quit()
-
 
 if __name__ == "__main__":
     main()

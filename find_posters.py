@@ -1,5 +1,4 @@
 import pygame
-import sys
 
 def find_poster_bbox(poster_path, base_path):
     pygame.init()

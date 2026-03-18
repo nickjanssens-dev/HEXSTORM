@@ -2,7 +2,6 @@ import pygame
 import math
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
-
 class Staff:
     def __init__(self):
         self.image = pygame.image.load(
@@ -18,18 +17,14 @@ class Staff:
         self.bob_amount_x = 6
         self.bob_amount_y = 5
 
-    # ======================
     # UPDATE
-    # ======================
     def update(self, dt, player):
         if player.is_moving:
             self.bob_time += dt * self.bob_speed
         else:
             self.bob_time = 0
 
-    # ======================
     # DRAW
-    # ======================
     def draw(self, screen):
         # Base position (RIGHT SIDE)
         base_x = SCREEN_WIDTH - self.image.get_width() - 240

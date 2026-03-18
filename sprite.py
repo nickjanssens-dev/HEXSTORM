@@ -11,7 +11,6 @@ from settings import (
     TILE_SIZE,
 )
 
-
 class Sprite:
     def __init__(self, x, y, texture, scale=0.4):
         self.x = x
@@ -20,7 +19,6 @@ class Sprite:
         self.scale = scale
         self.width = texture.get_width()
         self.height = texture.get_height()
-
 
 def render_sprites(screen, player, sprites, depth_buffer):
     visible_sprites = [
