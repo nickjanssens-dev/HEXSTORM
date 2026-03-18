@@ -8,7 +8,7 @@ FULLSCREEN = False
 
 # Map / world
 TILE_SIZE = 64
-TEXTURE_SIZE = 64
+TEXTURE_SIZE = 1024
 
 # Raycasting
 FOV = math.pi / 3
@@ -32,9 +32,9 @@ FLOOR_COLOR = (60, 120, 60)
 CROSSHAIR_COLOR = (220, 220, 220)
 
 # Textures
-WALL_TEXTURE_PATH = "assets/textures/walls/wall_stone.png"
+WALL_TEXTURE_PATH = "assets/textures/walls/wall_panel.png"
 POSTER_TEXTURE_PATH = "assets/textures/walls/wall_wanted_poster.png"
 HEXSTORM_TEXTURE_PATH = "assets/textures/walls/wall_hexstorm.png"
 
 SKY_TEXTURE_PATH = "assets/textures/sky_clouds_darker.png"
-GRASS_TEXTURE_PATH = "assets/textures/grass.png"
+GRASS_TEXTURE_PATH = "assets/textures/floor_tiles.png"

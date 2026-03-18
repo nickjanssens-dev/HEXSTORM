@@ -24,10 +24,9 @@
 - [ ] Map card to spell
 
 ## 🎮 UI / Polish
-- [ ] Crosshair
-- [ ] HUD (health, weapon)
+- [x] HUD (health, weapon)
 - [ ] Sound effects
-- [ ] Game over screen
+- [x] Game over screen
 
 ## 🚀 Nice to Have
 - [ ] Multiple weapons
