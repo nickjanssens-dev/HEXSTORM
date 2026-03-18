@@ -1,49 +1,32 @@
 import random
 from settings import TILE_SIZE
 
-def generate_map(width=26, height=26, num_rooms=10):
-    # Fill map with default wall type 1
+
+def generate_map(width=20, height=20, num_rooms=8):
+    # Initialize with walls
     new_map = [[1 for _ in range(width)] for _ in range(height)]
-    rooms = []
 
     for _ in range(num_rooms):
-        room_w = random.randint(4, 7)
-        room_h = random.randint(4, 7)
+        room_w = random.randint(3, 6)
+        room_h = random.randint(3, 6)
 
-        x = random.randint(1, width - room_w - 2)
-        y = random.randint(1, height - room_h - 2)
+        x = random.randint(1, width - room_w - 1)
+        y = random.randint(1, height - room_h - 1)
 
-        # Carve room
+        # Carve out the room
         for ry in range(y, y + room_h):
             for rx in range(x, x + room_w):
                 new_map[ry][rx] = 0
 
-        center_x = x + room_w // 2
-        center_y = y + room_h // 2
-        rooms.append((center_x, center_y))
-
-    # Connect rooms with corridors
-    for i in range(1, len(rooms)):
-        x1, y1 = rooms[i - 1]
-        x2, y2 = rooms[i]
-
-        # Horizontal corridor
-        for x in range(min(x1, x2), max(x1, x2) + 1):
-            new_map[y1][x] = 0
-
-        # Vertical corridor
-        for y in range(min(y1, y2), max(y1, y2) + 1):
-            new_map[y][x2] = 0
-
-    # Randomly place poster walls
-    for _ in range(35):
+    # Randomly add poster walls
+    for _ in range(25):
         y = random.randint(1, height - 2)
         x = random.randint(1, width - 2)
         if new_map[y][x] == 1:
             new_map[y][x] = 2
 
-    # Randomly place HEXSTORM walls
-    for _ in range(35):
+    # Randomly add HEXSTORM walls
+    for _ in range(25):
         y = random.randint(1, height - 2)
         x = random.randint(1, width - 2)
         if new_map[y][x] == 1:

@@ -3,6 +3,7 @@ import pygame
 
 from map import is_wall
 
+
 class Player:
     def __init__(self, x, y, angle, speed, rot_speed):
         self.x = x

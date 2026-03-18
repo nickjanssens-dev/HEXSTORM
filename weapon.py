@@ -1,33 +1,47 @@
+import os
 import pygame
 import math
 
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
 from map import game_map
 
+
 class Weapon:
     def __init__(self):
         self.frames = [
             pygame.transform.scale(
-                pygame.image.load("assets/textures/weapon/the_blue_flame_first_frame.png").convert_alpha(), (250, 250)
+                pygame.image.load("assets/textures/weapon/the_blue_flame_first_frame.png").convert_alpha(),
+                (250, 250)
             ),
             pygame.transform.scale(
-                pygame.image.load("assets/textures/weapon/the_blue_flame_second_frame.png").convert_alpha(), (250, 250)
+                pygame.image.load("assets/textures/weapon/the_blue_flame_second_frame.png").convert_alpha(),
+                (250, 250)
             ),
             pygame.transform.scale(
-                pygame.image.load("assets/textures/weapon/the_blue_flame_third_frame.png").convert_alpha(), (250, 250)
+                pygame.image.load("assets/textures/weapon/the_blue_flame_third_frame.png").convert_alpha(),
+                (250, 250)
             ),
         ]
+
+        # Blast effect
+        blast_path = os.path.join("assets", "textures", "misc", "blast.png")
+        self.blast_image = pygame.image.load(blast_path).convert_alpha()
+        self.blast_image = pygame.transform.scale(self.blast_image, (240, 240))
 
         self.frame_index = 0
         self.animation_timer = 0
         self.animation_speed = 100
 
-        # Shooting system
         self.is_shooting = False
         self.shoot_cooldown = 250
         self.last_shot_time = 0
 
         self.hit_position = None
+
+        # Blast timing
+        self.show_blast = False
+        self.blast_duration = 80
+        self.blast_timer = 0
 
         # Weapon bobbing
         self.bob_time = 0
@@ -38,10 +52,8 @@ class Weapon:
     def update(self, dt, player):
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pressed()
-
         current_time = pygame.time.get_ticks()
 
-        # Shoot input
         if (keys[pygame.K_SPACE] or mouse[0]) and current_time - self.last_shot_time > self.shoot_cooldown:
             self.is_shooting = True
             self.last_shot_time = current_time
@@ -49,7 +61,9 @@ class Weapon:
             self.animation_timer = 0
             self.hit_position = self.shoot(player)
 
-        # Shooting animation
+            self.show_blast = True
+            self.blast_timer = self.blast_duration
+
         if self.is_shooting:
             self.animation_timer += dt
             if self.animation_timer >= self.animation_speed:
@@ -60,14 +74,18 @@ class Weapon:
                     self.frame_index = 0
                     self.is_shooting = False
                     self.hit_position = None
+
         else:
             self.frame_index = 0
 
-        # Walking bob
+        if self.show_blast:
+            self.blast_timer -= dt
+            if self.blast_timer <= 0:
+                self.show_blast = False
+
         if player.is_moving:
             self.bob_time += dt * self.bob_speed
         else:
-            # reset smoothly when standing still
             self.bob_time = 0
 
     def shoot(self, player):
@@ -94,15 +112,9 @@ class Weapon:
         base_x = SCREEN_WIDTH // 2 - frame.get_width() // 2
         base_y = SCREEN_HEIGHT - frame.get_height()
 
-        # Default offsets
-        offset_x = 0
-        offset_y = 0
+        offset_x = math.sin(self.bob_time) * self.bob_amount_x
+        offset_y = abs(math.cos(self.bob_time)) * self.bob_amount_y
 
-        # Bobbing effect
-        offset_x += math.sin(self.bob_time) * self.bob_amount_x
-        offset_y += abs(math.cos(self.bob_time)) * self.bob_amount_y
-
-        # Small shooting kick
         if self.is_shooting:
             offset_y -= 12
 
@@ -111,11 +123,17 @@ class Weapon:
 
         screen.blit(frame, (weapon_x, weapon_y))
 
-        if self.hit_position:
-            self.draw_laser(screen)
+        if self.show_blast:
+            self.draw_blast(screen)
 
-    def draw_laser(self, screen):
-        start_pos = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-        end_pos = (start_pos[0], start_pos[1] - 120)
+    def draw_blast(self, screen):
+        # Horizontal shift → right
+        offset_x = 90  # increase for more right
 
-        pygame.draw.line(screen, (0, 255, 255), start_pos, end_pos, 3)
+        # Vertical shift → up (further away)
+        offset_y = -60  # more negative = further away
+
+        blast_x = SCREEN_WIDTH // 2 - self.blast_image.get_width() // 2 + offset_x
+        blast_y = SCREEN_HEIGHT // 2 - self.blast_image.get_height() // 2 + offset_y
+
+        screen.blit(self.blast_image, (blast_x, blast_y))

@@ -35,5 +35,5 @@ WALL_TEXTURE_PATH = "assets/textures/walls/wall_stone.png"
 POSTER_TEXTURE_PATH = "assets/textures/walls/wall_wanted_poster.png"
 HEXSTORM_TEXTURE_PATH = "assets/textures/walls/wall_hexstorm.png"
 
-SKY_TEXTURE_PATH = "assets/textures/sky_clouds.png"
+SKY_TEXTURE_PATH = "assets/textures/sky_clouds_darker.png"
 GRASS_TEXTURE_PATH = "assets/textures/grass.png"

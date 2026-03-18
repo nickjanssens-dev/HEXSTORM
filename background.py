@@ -3,22 +3,32 @@ import pygame
 
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
+# cache
+_sky_scaled = None
+_grass_tile = None
+
 
 def draw_background(screen, sky_texture, grass_texture, player):
+    global _sky_scaled, _grass_tile
+
     half_height = SCREEN_HEIGHT // 2
 
-    # Sky: Parallax rotation
-    # Map the player's angle (0 to 2*pi) to the screen width
+    # Prepare sky once
+    if _sky_scaled is None:
+        _sky_scaled = pygame.transform.scale(sky_texture, (SCREEN_WIDTH, half_height))
+
+    # Prepare grass once: crop instead of scaling whole texture
+    if _grass_tile is None:
+        tile_size = 512
+        _grass_tile = grass_texture.subsurface((0, 0, tile_size, tile_size)).copy()
+
+    # Sky parallax
     sky_offset = int(-player.angle * (SCREEN_WIDTH / (math.pi / 2))) % SCREEN_WIDTH
-    sky_scaled = pygame.transform.scale(sky_texture, (SCREEN_WIDTH, half_height))
+    screen.blit(_sky_scaled, (sky_offset, 0))
+    screen.blit(_sky_scaled, (sky_offset - SCREEN_WIDTH, 0))
 
-    screen.blit(sky_scaled, (sky_offset, 0))
-    screen.blit(sky_scaled, (sky_offset - SCREEN_WIDTH, 0))
-
-    # Floor: Static tiling
-    tile_size = 128
-    grass_tile = pygame.transform.scale(grass_texture, (tile_size, tile_size))
-
+    # Grass floor
+    tile_size = _grass_tile.get_width()
     for y in range(half_height, SCREEN_HEIGHT, tile_size):
         for x in range(0, SCREEN_WIDTH, tile_size):
-            screen.blit(grass_tile, (x, y))
+            screen.blit(_grass_tile, (x, y))
