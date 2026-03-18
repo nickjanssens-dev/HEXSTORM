@@ -14,8 +14,8 @@
 - [ ] Weapon switching
 
 ## 👾 Enemies
-- [ ] Add enemy sprite
-- [ ] Basic AI (follow player)
+- [x] Add enemy sprite
+- [x] Basic AI (follow player)
 - [ ] Health system
 
 ## 🧠 Card Input
@@ -26,12 +26,13 @@
 ## 🎮 UI / Polish
 - [x] HUD (health, weapon)
 - [ ] Sound effects
+- [ ] Song
 - [x] Game over screen
 
 ## 🚀 Nice to Have
 - [ ] Multiple weapons
-- [ ] Wave system
-- [ ] Score system
+- [x] Wave system
+- [ ] If score system, add random enemies
 
 ## 🥶 IMPORTANT IMPLEMENTATION
 - [ ] Enemy damage

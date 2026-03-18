@@ -34,7 +34,7 @@ CROSSHAIR_COLOR = (220, 220, 220)
 # Textures
 WALL_TEXTURE_PATH = "assets/textures/walls/wall_panel.png"
 POSTER_TEXTURE_PATH = "assets/textures/walls/wall_wanted_poster.png"
-HEXSTORM_TEXTURE_PATH = "assets/textures/walls/wall_hexstorm.png"
+HEXSTORM_TEXTURE_PATH = "assets/textures/walls/wall_panel.png"
 
 SKY_TEXTURE_PATH = "assets/textures/sky_clouds_darker.png"
 GRASS_TEXTURE_PATH = "assets/textures/floor_tiles.png"

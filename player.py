@@ -63,3 +63,8 @@ class Player:
             self.x = new_x
         if not is_wall(self.x, new_y):
             self.y = new_y
+
+    def take_damage(self, amount):
+        self.health -= amount
+        if self.health < 0:
+            self.health = 0
