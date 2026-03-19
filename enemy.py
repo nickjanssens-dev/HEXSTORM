@@ -4,28 +4,30 @@ import os
 import settings
 from map import is_wall
 
+
 def check_line_of_sight(x1, y1, x2, y2):
     dx = x2 - x1
     dy = y2 - y1
     dist = math.hypot(dx, dy)
     if dist < 1:
         return True
-    
+
     steps = int(dist / (settings.TILE_SIZE / 4))
     if steps == 0:
         return True
 
     step_x = dx / steps
     step_y = dy / steps
-    
+
     cx, cy = x1, y1
     for _ in range(steps):
         if is_wall(cx, cy):
             return False
         cx += step_x
         cy += step_y
-        
+
     return True
+
 
 class Enemy:
     def __init__(self, x, y):
@@ -42,7 +44,7 @@ class Enemy:
 
         self.hit_radius = 28
         self.frame_size = 64
-        
+
         self.state = "idle"
         self.anim_index = 0.0
         self.anim_speed = 0.012
@@ -76,7 +78,7 @@ class Enemy:
         frames = self.get_frames()
         if not frames:
             return
-            
+
         self.anim_index += self.anim_speed * dt
 
         if self.anim_index >= len(frames):
@@ -219,7 +221,9 @@ class Enemy:
             sprite_width = sprite_height * aspect_ratio
 
         half_width = sprite_width // 2
-        screen_y = settings.SCREEN_HEIGHT // 2 - sprite_height // 2
+        y_offset_val = getattr(self, "y_offset", 0)
+        proj_y = int(y_offset_val / corrected_depth * settings.DIST_TO_PROJ_PLANE)
+        screen_y = settings.SCREEN_HEIGHT // 2 - sprite_height // 2 + proj_y
 
         step = orig_w / max(1.0, float(sprite_width))
 
@@ -241,6 +245,7 @@ class Enemy:
                                 column, (1, int(sprite_height))
                             )
                             screen.blit(column_scaled, (pixel_x, screen_y))
+
 
 class Bat(Enemy):
     _animations_cache = {}
@@ -275,7 +280,7 @@ class Bat(Enemy):
                     Bat._fly_sound.set_volume(0.3)
             except:
                 pass
-        
+
         self.animations = Bat._animations_cache
         self.current_sprite = self.animations[self.state][0]
 
@@ -298,50 +303,170 @@ class Bat(Enemy):
     def play_attack_sound(self):
         if Bat._attack_sound: Bat._attack_sound.play()
 
+
 class Skeleton(Enemy):
     _animations_cache = {}
 
     def __init__(self, x, y):
         super().__init__(x, y)
+
         self.speed = 0.02
         self.health = 200
         self.damage = 15
-        self.anim_speed = 0.025
+        self.hit_radius = 30
+
+        # Faster looks smoother
+        self.anim_speed = 0.02
+
+        # 🔥 Grounding fix (IMPORTANT)
+        self.y_offset = 6   # try 6–10 range
 
         if not Skeleton._animations_cache:
             Skeleton._animations_cache = {
                 "idle": self._load_sheet("Skeleton_01_White_Idle.png"),
-                "run": self._load_sheet("Skeleton_01_White_Walk.png"),  
-                "attack": self._load_sheet("Skeleton_01_White_Attack1.png") + self._load_sheet("Skeleton_01_White_Attack2.png"),
+                "run": self._load_sheet("Skeleton_01_White_Walk.png"),
+                "attack": self._load_sheet("Skeleton_01_White_Attack1.png")
+                          + self._load_sheet("Skeleton_01_White_Attack2.png"),
                 "hurt": self._load_sheet("Skeleton_01_White_Hurt.png"),
                 "die": self._load_sheet("Skeleton_01_White_Die.png"),
             }
-        
+
         self.animations = Skeleton._animations_cache
         self.current_sprite = self.animations[self.state][0]
 
     def _load_sheet(self, filename):
-        path = os.path.join("assets", "textures", "enemy", "Skeletons_Free_Pack", "Skeletons_Free_Pack", "Skeleton_Sword", "Skeleton_White", "Skeleton_Without_VFX", filename)
+        path = os.path.join(
+            "assets",
+            "textures",
+            "enemy",
+            "Skeletons_Free_Pack",
+            "Skeletons_Free_Pack",
+            "Skeleton_Sword",
+            "Skeleton_White",
+            "Skeleton_Without_VFX",
+            filename
+        )
+
         try:
             sheet = pygame.image.load(path).convert_alpha()
-            return self._slice_sheet(sheet, sheet.get_height())
         except Exception as e:
-            fail = pygame.Surface((64, 64))
+            print(f"Error loading skeleton sheet {path}: {e}")
+            fail = pygame.Surface((64, 64), pygame.SRCALPHA)
             fail.fill((255, 0, 255))
             return [fail]
 
+        frames = self._slice_sheet(sheet)
+        return self._normalize_frames(frames)
+
+    def _slice_sheet(self, sheet):
+        sheet_width = sheet.get_width()
+        sheet_height = sheet.get_height()
+
+        frame_width = sheet_height
+
+        if frame_width <= 0:
+            return [sheet]
+
+        frame_count = sheet_width // frame_width
+
+        if frame_count <= 0:
+            return [sheet]
+
+        frames = []
+        for i in range(frame_count):
+            x = i * frame_width
+            if x + frame_width <= sheet_width:
+                frame = sheet.subsurface((x, 0, frame_width, sheet_height)).copy()
+                frames.append(frame)
+
+        return frames if frames else [sheet]
+
+    def _normalize_frames(self, frames):
+        """
+        Stabilized version:
+        - trims transparency
+        - bottom-aligns (feet fixed)
+        - reduces sideways jitter
+        """
+        trimmed_frames = []
+
+        for frame in frames:
+            bounds = frame.get_bounding_rect()
+
+            if bounds.width == 0 or bounds.height == 0:
+                trimmed = pygame.Surface((1, 1), pygame.SRCALPHA)
+            else:
+                trimmed = frame.subsurface(bounds).copy()
+
+            trimmed_frames.append(trimmed)
+
+        max_w = max(frame.get_width() for frame in trimmed_frames)
+        max_h = max(frame.get_height() for frame in trimmed_frames)
+
+        normalized = []
+
+        for i, frame in enumerate(trimmed_frames):
+            surface = pygame.Surface((max_w, max_h), pygame.SRCALPHA)
+
+            # 🔥 MUCH smoother offsets (less aggressive)
+            offset_x = 0
+            offset_y = 0
+
+            if i in [1]:
+                offset_x = -1
+            elif i in [2]:
+                offset_x = -1
+            elif i in [3]:
+                offset_x = +1
+            elif i in [4]:
+                offset_x = +1
+
+            # 🔥 tiny vertical correction (prevents foot jitter)
+            if i in [2, 3]:
+                offset_y = 1
+
+            x = (max_w - frame.get_width()) // 2 + offset_x
+            y = max_h - frame.get_height() + offset_y
+
+            surface.blit(frame, (x, y))
+            normalized.append(surface)
+
+        return normalized
+
     def get_frames(self):
         return self.animations.get(self.state, self.animations["idle"])
+
+    def update_animation(self, dt):
+        frames = self.get_frames()
+        self.anim_index += self.anim_speed * dt
+
+        if self.anim_index >= len(frames):
+            if self.state == "die":
+                self.anim_index = len(frames) - 1
+            elif self.state == "hurt":
+                self.anim_index = 0.0
+                self.state = "idle"
+            else:
+                self.anim_index = 0.0
+
+        self.current_sprite = frames[int(self.anim_index)]
+
 
 class Slime(Enemy):
     _animations_cache = {}
 
     def __init__(self, x, y):
         super().__init__(x, y)
+
         self.speed = 0.015
         self.health = 50
         self.damage = 5
+
+        # Slower animation feels more "squishy"
         self.anim_speed = 0.006
+
+        # 🔥 IMPORTANT: push slime down so it touches ground
+        self.y_offset = 24   # lowered further to make it touch the ground
 
         if not Slime._animations_cache:
             Slime._animations_cache = {
@@ -351,21 +476,33 @@ class Slime(Enemy):
                 "hurt": self._load_individual("hurt", 4),
                 "die": self._load_individual("die", 4),
             }
-        
+
         self.animations = Slime._animations_cache
         self.current_sprite = self.animations[self.state][0]
 
     def _load_individual(self, prefix, count):
         frames = []
+
         for i in range(count):
-            path = os.path.join("assets", "textures", "enemy", "Slime", "Individual Sprites", f"slime-{prefix}-{i}.png")
+            path = os.path.join(
+                "assets",
+                "textures",
+                "enemy",
+                "Slime",
+                "Individual Sprites",
+                f"slime-{prefix}-{i}.png"
+            )
+
             try:
                 frame = pygame.image.load(path).convert_alpha()
                 frames.append(frame)
+
             except Exception as e:
-                fail = pygame.Surface((64, 64))
+                print(f"Error loading slime frame {path}: {e}")
+                fail = pygame.Surface((64, 64), pygame.SRCALPHA)
                 fail.fill((255, 0, 255))
                 frames.append(fail)
+
         return frames if frames else [pygame.Surface((64, 64))]
 
     def get_frames(self):

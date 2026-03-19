@@ -104,14 +104,36 @@ def load_menu_background():
     return pygame.transform.scale(image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 
-def create_plant_sprites(amount=15):
+def create_decor_sprites(amount=30):
     sprites = []
 
-    plant_texture = pygame.image.load(
-        "assets/textures/sprites/plant_fern.png"
-    ).convert_alpha()
+    # Try loading all 3 decor textures
+    textures = []
+    
+    try:
+        plant_tex = pygame.image.load("assets/textures/sprites/plant_fern.png").convert_alpha()
+        plant_tex = plant_tex.subsurface((253, 232, 502, 512)).copy()
+        textures.append(plant_tex)
+    except Exception as e:
+        print("Could not load plant_fern.png", e)
 
-    plant_texture = plant_texture.subsurface((253, 232, 502, 512)).copy()
+    try:
+        bones_tex = pygame.image.load("assets/textures/sprites/bones.png").convert_alpha()
+        textures.append(bones_tex)
+    except Exception as e:
+        print("Could not load bones.png", e)
+
+    try:
+        pillar_tex = pygame.image.load("assets/textures/sprites/1be9878e-3402-47ee-8f09-652e9bf05780.png").convert_alpha()
+        textures.append(pillar_tex)
+    except Exception as e:
+        print("Could not load pillar texture", e)
+
+    if not textures:
+        # Fallback empty surface
+        fall = pygame.Surface((64, 64))
+        fall.fill((0, 255, 0))
+        textures.append(fall)
 
     for _ in range(amount):
         while True:
@@ -121,13 +143,14 @@ def create_plant_sprites(amount=15):
             if game_map[sy][sx] == 0:
                 sprite_x = sx * TILE_SIZE + TILE_SIZE // 2
                 sprite_y = sy * TILE_SIZE + TILE_SIZE // 2
-                sprites.append(Sprite(sprite_x, sprite_y, plant_texture))
+                tex = random.choice(textures)
+                sprites.append(Sprite(sprite_x, sprite_y, tex))
                 break
 
     return sprites
 
 
-def create_enemies(player=None, amount=3):
+def create_enemies(player=None, amount=8):
     enemies = []
 
     for _ in range(amount):
@@ -220,8 +243,8 @@ def reset_game():
         PLAYER_ROT_SPEED
     )
 
-    sprites = create_plant_sprites(15)
-    enemies = create_enemies(player, 3)
+    sprites = create_decor_sprites(30)
+    enemies = create_enemies(player, 8)
     explosions = []
 
     weapon = Weapon()
@@ -468,7 +491,7 @@ def main():
 
             if alive_count == 0:
                 wave += 1
-                enemies.extend(create_enemies(player, 2 + wave))
+                enemies.extend(create_enemies(player, 5 + wave * 2))
 
             if player.health <= 0:
                 game_state = STATE_GAME_OVER

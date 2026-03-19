@@ -70,7 +70,7 @@ def draw_hud(screen, player, wave=None, kills=None, game_over=False, enemies=Non
 
     draw_text(screen, font, f"HP: {player.health}", (255, 70, 70), 80, text_y)
     draw_text(screen, font, f"MP: {int(player.mana)}", (80, 170, 255), 200, text_y)
-    draw_text(screen, font, f"Spell: {player.current_spell}", (255, 245, 140), 720, text_y)
+    #draw_text(screen, font, f"Spell: {player.current_spell}", (255, 245, 140), 720, text_y)
 
     draw_fullscreen_button(screen)
 
@@ -98,8 +98,8 @@ def draw_hud(screen, player, wave=None, kills=None, game_over=False, enemies=Non
             # On screen Y axis is down. So UP is angle -pi/2
             display_angle = angle_diff - math.pi / 2
             
-            cx = settings.SCREEN_WIDTH // 2
-            cy = settings.SCREEN_HEIGHT - HUD_HEIGHT // 2
+            cx = settings.SCREEN_WIDTH // 2 + 7
+            cy = settings.SCREEN_HEIGHT - HUD_HEIGHT // 2 -80
             
             size = 20
             tip_x = cx + math.cos(display_angle) * size

@@ -37,9 +37,13 @@ def ray_casting(screen, player, textures):
 
                 if hit_x < 1 or hit_x > settings.TILE_SIZE - 1:
                     texture_x = int((hit_y / settings.TILE_SIZE) * settings.TEXTURE_SIZE)
+                    if cos_a < 0:
+                        texture_x = settings.TEXTURE_SIZE - texture_x - 1
                 else:
                     texture_x = int((hit_x / settings.TILE_SIZE) * settings.TEXTURE_SIZE)
-
+                    if sin_a > 0:
+                        texture_x = settings.TEXTURE_SIZE - texture_x - 1
+                        
                 texture_x = max(0, min(settings.TEXTURE_SIZE - 1, texture_x))
 
                 texture_column = wall_texture.subsurface(texture_x, 0, 1, settings.TEXTURE_SIZE)

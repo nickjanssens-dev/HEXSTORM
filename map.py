@@ -96,8 +96,8 @@ def is_wall(x, y):
     map_y = int(y // TILE_SIZE)
 
     if 0 <= map_y < len(game_map) and 0 <= map_x < len(game_map[0]):
-        return game_map[map_y][map_x] != 0
-    return True
+        return game_map[map_y][map_x]
+    return 1
 
 
 def get_free_pos():
