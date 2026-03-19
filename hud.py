@@ -1,13 +1,14 @@
 import os
 import pygame
 
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, CROSSHAIR_COLOR
+import settings
 
 HUD_IMAGE = None
 HUD_HEIGHT = 100
 
 def get_fullscreen_button_rect():
-    return pygame.Rect(SCREEN_WIDTH - 50, 10, 40, 40)
+    import settings
+    return pygame.Rect(settings.SCREEN_WIDTH - 50, 10, 40, 40)
 
 def draw_fullscreen_button(screen):
     rect = get_fullscreen_button_rect()
@@ -34,6 +35,7 @@ def draw_fullscreen_button(screen):
 
 def load_hud():
     global HUD_IMAGE
+    import settings
 
     base_dir = os.path.dirname(__file__)
     path = os.path.join(base_dir, "assets", "textures", "misc", "HUD.png")
@@ -43,7 +45,7 @@ def load_hud():
     bounds = raw.get_bounding_rect()
     raw = raw.subsurface(bounds).copy()
 
-    HUD_IMAGE = pygame.transform.smoothscale(raw, (SCREEN_WIDTH, HUD_HEIGHT))
+    HUD_IMAGE = pygame.transform.smoothscale(raw, (settings.SCREEN_WIDTH, HUD_HEIGHT))
 
 def draw_text(screen, font, text, color, x, y):
     shadow = font.render(text, True, (0, 0, 0))
@@ -55,8 +57,9 @@ def draw_text(screen, font, text, color, x, y):
     screen.blit(main, (x, y + 1))
 
 def draw_hud(screen, player, wave=None, kills=None, game_over=False):
+    import settings
     hud_x = 0
-    hud_y = SCREEN_HEIGHT - HUD_HEIGHT
+    hud_y = settings.SCREEN_HEIGHT - HUD_HEIGHT
 
     screen.blit(HUD_IMAGE, (hud_x, hud_y))
 
@@ -65,7 +68,7 @@ def draw_hud(screen, player, wave=None, kills=None, game_over=False):
     text_y = hud_y - 30
 
     draw_text(screen, font, f"HP: {player.health}", (255, 70, 70), 80, text_y)
-    draw_text(screen, font, f"MP: {player.mana}", (80, 170, 255), 200, text_y)
+    draw_text(screen, font, f"MP: {int(player.mana)}", (80, 170, 255), 200, text_y)
     draw_text(screen, font, f"Spell: {player.current_spell}", (255, 245, 140), 720, text_y)
 
     draw_fullscreen_button(screen)
@@ -79,7 +82,7 @@ def draw_hud(screen, player, wave=None, kills=None, game_over=False):
 
     # --- Game Over Overlay ---
     if game_over:
-        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
         screen.blit(overlay, (0, 0))
 
@@ -92,13 +95,13 @@ def draw_hud(screen, player, wave=None, kills=None, game_over=False):
 
         screen.blit(
             text_game_over,
-            (SCREEN_WIDTH // 2 - text_game_over.get_width() // 2, SCREEN_HEIGHT // 2 - 100)
+            (settings.SCREEN_WIDTH // 2 - text_game_over.get_width() // 2, settings.SCREEN_HEIGHT // 2 - 100)
         )
         screen.blit(
             text_stats,
-            (SCREEN_WIDTH // 2 - text_stats.get_width() // 2, SCREEN_HEIGHT // 2)
+            (settings.SCREEN_WIDTH // 2 - text_stats.get_width() // 2, settings.SCREEN_HEIGHT // 2)
         )
         screen.blit(
             text_restart,
-            (SCREEN_WIDTH // 2 - text_restart.get_width() // 2, SCREEN_HEIGHT // 2 + 100)
+            (settings.SCREEN_WIDTH // 2 - text_restart.get_width() // 2, settings.SCREEN_HEIGHT // 2 + 100)
         )

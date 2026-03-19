@@ -2,7 +2,7 @@ import os
 import math
 import pygame
 
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
+import settings
 from map import game_map
 
 class Weapon:
@@ -116,8 +116,8 @@ class Weapon:
                     return (enemy.x, enemy.y)
 
             # Then check walls
-            map_x = int(x // TILE_SIZE)
-            map_y = int(y // TILE_SIZE)
+            map_x = int(x // settings.TILE_SIZE)
+            map_y = int(y // settings.TILE_SIZE)
 
             if 0 <= map_y < len(game_map) and 0 <= map_x < len(game_map[0]):
                 if game_map[map_y][map_x] > 0:
@@ -130,8 +130,8 @@ class Weapon:
     def draw(self, screen):
         frame = self.frames[self.frame_index]
 
-        base_x = SCREEN_WIDTH // 2 - frame.get_width() // 2 - 120
-        base_y = SCREEN_HEIGHT - frame.get_height()
+        base_x = settings.SCREEN_WIDTH // 2 - frame.get_width() // 2 - 120
+        base_y = settings.SCREEN_HEIGHT - frame.get_height()
 
         offset_x = math.sin(self.bob_time) * self.bob_amount_x
         offset_y = abs(math.cos(self.bob_time)) * self.bob_amount_y

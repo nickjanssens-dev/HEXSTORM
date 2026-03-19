@@ -12,7 +12,9 @@ class Player:
         self.rot_speed = rot_speed
 
         self.health = 100
-        self.mana = 100
+        self.max_mana = 2000
+        self.mana = self.max_mana
+        self.regen_rate = 50 # mana per second
         self.current_spell = "Firebolt"
 
         self.is_moving = False
@@ -22,7 +24,7 @@ class Player:
         self.alive = True
 
     def movement(self):
-        # ❗ Don't move if dead
+        # Don't move if dead
         if not self.alive:
             return
 
@@ -80,3 +82,12 @@ class Player:
         # Death handling
         if self.health == 0:
             self.alive = False
+
+    def regenerate_mana(self, dt):
+        if not self.alive:
+            return
+            
+        if self.mana < self.max_mana:
+            self.mana += self.regen_rate * (dt / 1000.0)
+            if self.mana > self.max_mana:
+                self.mana = self.max_mana
