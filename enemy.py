@@ -410,6 +410,8 @@ class Skeleton(Enemy):
 
         return frames if frames else [sheet]
 
+
+
     def _normalize_frames(self, frames):
         """
         Stabilized version:
@@ -558,6 +560,79 @@ class Slime(Enemy):
                 frames.append(fail)
 
         return frames if frames else [pygame.Surface((64, 64))]
+
+    def get_frames(self):
+        return self.animations.get(self.state, self.animations["idle"])
+
+
+class Wolf(Enemy):
+    _animations_cache = {}
+
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.speed = 0.03
+        self.health = 150
+        self.damage = 12
+        self.hit_radius = 26
+        self.anim_speed = 0.015
+        self.y_offset = 20  # Keep it grounded
+
+        if not Wolf._animations_cache:
+            Wolf._animations_cache = {
+                "idle": self._load_sheet("wolf_idle.png", 8),
+                "run": self._load_sheet("wolf_run.png", 3),
+                "attack": self._load_sheet("wolf_run.png", 3), # Reuse run for attack
+                "hurt": self._load_sheet("wolf_idle.png", 8), # Reuse idle
+                "die": self._load_sheet("wolf_idle.png", 8),  # Reuse idle
+            }
+
+        self.animations = Wolf._animations_cache
+        self.current_sprite = self.animations[self.state][0]
+
+        if not Wolf._attack_sound:
+            try:
+                snd_dir = os.path.join("assets", "textures", "sounds", "enemy_sounds")
+                att_path = os.path.join(snd_dir, "wolf-attack.wav")
+                if os.path.exists(att_path):
+                    Wolf._attack_sound = pygame.mixer.Sound(att_path)
+                    Wolf._attack_sound.set_volume(0.5)
+
+                die_path = os.path.join(snd_dir, "wolf-howling.wav")
+                if os.path.exists(die_path):
+                    Wolf._death_sound = pygame.mixer.Sound(die_path)
+                    Wolf._death_sound.set_volume(0.6)
+            except Exception as e:
+                print(f"Error loading wolf sounds: {e}")
+
+    _attack_sound = None
+    _death_sound = None
+
+    def play_attack_sound(self):
+        if Wolf._attack_sound:
+            Wolf._attack_sound.play()
+
+    def play_death_sound(self):
+        if Wolf._death_sound:
+            Wolf._death_sound.play()
+
+    def _load_sheet(self, filename, frame_count):
+        path = os.path.join("assets", "textures", "enemy", "Wolf", filename)
+        try:
+            sheet = pygame.image.load(path).convert_alpha()
+            sheet_w, sheet_h = sheet.get_size()
+            frame_width = sheet_w // frame_count
+            frames = []
+            for i in range(frame_count):
+                frame = sheet.subsurface((i * frame_width, 0, frame_width, sheet_h))
+                # Scale up slightly for better visibility
+                frame = pygame.transform.scale(frame, (frame_width * 2, sheet_h * 2))
+                frames.append(frame)
+            return frames
+        except Exception as e:
+            print(f"Error loading wolf sheet {path}: {e}")
+            fail = pygame.Surface((64, 64))
+            fail.fill((255, 0, 255))
+            return [fail]
 
     def get_frames(self):
         return self.animations.get(self.state, self.animations["idle"])

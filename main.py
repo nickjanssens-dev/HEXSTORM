@@ -46,7 +46,7 @@ from player import Player
 from raycasting import ray_casting
 from weapon import Weapon
 from staff import Staff
-from enemy import Bat, Skeleton, Slime
+from enemy import Bat, Skeleton, Slime, Wolf
 from explosion import Explosion
 from settings import (
     SCREEN_WIDTH,
@@ -172,7 +172,7 @@ def create_enemies(player=None, amount=8, used_tiles=None):
                         continue
 
                 used_tiles.add((sx, sy))
-                enemies.append(random.choice([Bat, Skeleton, Slime])(enemy_x, enemy_y))
+                enemies.append(random.choice([Bat, Skeleton, Slime, Wolf])(enemy_x, enemy_y))
                 break
 
     return enemies
