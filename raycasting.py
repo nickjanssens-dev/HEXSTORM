@@ -2,29 +2,19 @@ import math
 import pygame
 
 from map import is_wall
-from settings import (
-    SCREEN_HEIGHT,
-    HALF_FOV,
-    NUM_RAYS,
-    MAX_DEPTH,
-    DELTA_ANGLE,
-    DIST_TO_PROJ_PLANE,
-    SCALE,
-    TILE_SIZE,
-    TEXTURE_SIZE,
-)
+import settings
 
 def ray_casting(screen, player, textures):
-    start_angle = player.angle - HALF_FOV
+    start_angle = player.angle - settings.HALF_FOV
     depth_buffer = []
 
-    for ray in range(NUM_RAYS):
-        ray_angle = (start_angle + ray * DELTA_ANGLE) % math.tau
+    for ray in range(settings.NUM_RAYS):
+        ray_angle = (start_angle + ray * settings.DELTA_ANGLE) % math.tau
 
         sin_a = math.sin(ray_angle)
         cos_a = math.cos(ray_angle)
 
-        for depth in range(1, MAX_DEPTH):
+        for depth in range(1, settings.MAX_DEPTH):
             target_x = player.x + depth * cos_a
             target_y = player.y + depth * sin_a
 
@@ -36,31 +26,31 @@ def ray_casting(screen, player, textures):
 
                 wall_height = max(
                     1,
-                    int((TILE_SIZE / corrected_depth) * DIST_TO_PROJ_PLANE)
+                    int((settings.TILE_SIZE / corrected_depth) * settings.DIST_TO_PROJ_PLANE)
                 )
-                wall_top = (SCREEN_HEIGHT // 2) - wall_height // 2
+                wall_top = (settings.SCREEN_HEIGHT // 2) - wall_height // 2
 
-                hit_x = target_x % TILE_SIZE
-                hit_y = target_y % TILE_SIZE
+                hit_x = target_x % settings.TILE_SIZE
+                hit_y = target_y % settings.TILE_SIZE
 
                 wall_texture = textures.get(wall_type, textures.get(1))
 
-                if hit_x < 1 or hit_x > TILE_SIZE - 1:
-                    texture_x = int((hit_y / TILE_SIZE) * TEXTURE_SIZE)
+                if hit_x < 1 or hit_x > settings.TILE_SIZE - 1:
+                    texture_x = int((hit_y / settings.TILE_SIZE) * settings.TEXTURE_SIZE)
                 else:
-                    texture_x = int((hit_x / TILE_SIZE) * TEXTURE_SIZE)
+                    texture_x = int((hit_x / settings.TILE_SIZE) * settings.TEXTURE_SIZE)
 
-                texture_x = max(0, min(TEXTURE_SIZE - 1, texture_x))
+                texture_x = max(0, min(settings.TEXTURE_SIZE - 1, texture_x))
 
-                texture_column = wall_texture.subsurface(texture_x, 0, 1, TEXTURE_SIZE)
-                wall_column = pygame.transform.scale(texture_column, (SCALE, wall_height))
+                texture_column = wall_texture.subsurface(texture_x, 0, 1, settings.TEXTURE_SIZE)
+                wall_column = pygame.transform.scale(texture_column, (settings.SCALE, wall_height))
 
                 shade = max(50, 255 - int(corrected_depth * 0.5))
                 wall_column.fill((shade, shade, shade), special_flags=pygame.BLEND_MULT)
 
-                screen.blit(wall_column, (ray * SCALE, wall_top))
+                screen.blit(wall_column, (ray * settings.SCALE, wall_top))
                 break
         else:
-            depth_buffer.append(MAX_DEPTH)
+            depth_buffer.append(settings.MAX_DEPTH)
 
     return depth_buffer

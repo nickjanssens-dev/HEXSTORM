@@ -19,6 +19,13 @@ DELTA_ANGLE = FOV / NUM_RAYS
 DIST_TO_PROJ_PLANE = (SCREEN_WIDTH // 2) / math.tan(HALF_FOV)
 SCALE = SCREEN_WIDTH // NUM_RAYS
 
+def update_resolution(new_width, new_height):
+    global SCREEN_WIDTH, SCREEN_HEIGHT, DIST_TO_PROJ_PLANE, SCALE
+    SCREEN_WIDTH = new_width
+    SCREEN_HEIGHT = new_height
+    DIST_TO_PROJ_PLANE = (SCREEN_WIDTH // 2) / math.tan(HALF_FOV)
+    SCALE = SCREEN_WIDTH // NUM_RAYS
+
 # Player
 PLAYER_POS_X = 96
 PLAYER_POS_Y = 96
@@ -34,7 +41,7 @@ CROSSHAIR_COLOR = (220, 220, 220)
 # Textures
 WALL_TEXTURE_PATH = "assets/textures/walls/wall_panel.png"
 POSTER_TEXTURE_PATH = "assets/textures/walls/wall_wanted_poster.png"
-HEXSTORM_TEXTURE_PATH = "assets/textures/walls/wall_panel.png"
+HEXSTORM_TEXTURE_PATH = "assets/textures/walls/wall_hexstorm.png"
 
 SKY_TEXTURE_PATH = "assets/textures/sky_clouds_darker.png"
 GRASS_TEXTURE_PATH = "assets/textures/floor_tiles.png"
