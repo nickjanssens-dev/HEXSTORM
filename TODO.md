@@ -6,17 +6,16 @@
 - [x] Player movement
 - [x] Map
 - [x] Mouse / rotation improvements
-- [ ] Collision refinement
+- [x] Collision refinement
 
 ## 🔫 Combat
 - [x] Add shooting (laser / hitscan)
 - [ ] Add projectile system (fireball)
-- [ ] Weapon switching
 
 ## 👾 Enemies
 - [x] Add enemy sprite
 - [x] Basic AI (follow player)
-- [ ] Health system
+- [x] Health system
 
 ## 🧠 Card Input
 - [ ] Setup webcam 
@@ -35,10 +34,13 @@
 - [ ] If score system, add random enemies
 
 ## 🥶 IMPORTANT IMPLEMENTATION
-- [ ] Enemy damage
+- [x] Enemy damage
 - [ ] More enemies
 - [ ] After 5 waves special enemy
-- [ ] Ammo, reload 
-- [ ] Add card implementation
+- [ ] Card implementation
+- [ ] Add projectile system (fireball)
 
 - [ ] Due Friday - Finish project
+
+Extra:
+- [ ] Ammo, reload 

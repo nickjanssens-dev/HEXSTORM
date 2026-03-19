@@ -1,13 +1,13 @@
 import os
-import pygame
 import math
+import pygame
 
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
+import settings
 from map import game_map
-
 
 class Weapon:
     def __init__(self):
+        # Weapon animation frames
         self.frames = [
             pygame.transform.scale(
                 pygame.image.load("assets/textures/weapon/the_blue_flame_first_frame.png").convert_alpha(),
@@ -28,10 +28,12 @@ class Weapon:
         self.blast_image = pygame.image.load(blast_path).convert_alpha()
         self.blast_image = pygame.transform.scale(self.blast_image, (240, 240))
 
+        # Animation state
         self.frame_index = 0
         self.animation_timer = 0
         self.animation_speed = 100
 
+        # Shooting
         self.is_shooting = False
         self.shoot_cooldown = 250
         self.last_shot_time = 0
@@ -49,7 +51,12 @@ class Weapon:
         self.bob_amount_x = 8
         self.bob_amount_y = 6
 
-    def update(self, dt, player):
+        # Damage
+        self.damage = 25
+        self.range = 800
+        self.enemy_hit_radius = 25
+
+    def update(self, dt, player, enemies):
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pressed()
         current_time = pygame.time.get_ticks()
@@ -59,7 +66,8 @@ class Weapon:
             self.last_shot_time = current_time
             self.frame_index = 1
             self.animation_timer = 0
-            self.hit_position = self.shoot(player)
+
+            self.hit_position = self.shoot(player, enemies)
 
             self.show_blast = True
             self.blast_timer = self.blast_duration
@@ -74,7 +82,6 @@ class Weapon:
                     self.frame_index = 0
                     self.is_shooting = False
                     self.hit_position = None
-
         else:
             self.frame_index = 0
 
@@ -88,29 +95,43 @@ class Weapon:
         else:
             self.bob_time = 0
 
-    def shoot(self, player):
+    def shoot(self, player, enemies):
         angle = player.angle
         sin_a = math.sin(angle)
         cos_a = math.cos(angle)
 
-        for depth in range(1, 800):
+        for depth in range(1, self.range):
             x = player.x + depth * cos_a
             y = player.y + depth * sin_a
 
-            map_x = int(x // TILE_SIZE)
-            map_y = int(y // TILE_SIZE)
+            # Check enemies first
+            for enemy in enemies:
+                if not enemy.alive:
+                    continue
+
+                dist_to_hit = math.hypot(enemy.x - x, enemy.y - y)
+
+                if dist_to_hit < self.enemy_hit_radius:
+                    enemy.take_damage(self.damage)
+                    return (enemy.x, enemy.y)
+
+            # Then check walls
+            map_x = int(x // settings.TILE_SIZE)
+            map_y = int(y // settings.TILE_SIZE)
 
             if 0 <= map_y < len(game_map) and 0 <= map_x < len(game_map[0]):
                 if game_map[map_y][map_x] > 0:
                     return (x, y)
+            else:
+                return None
 
         return None
 
     def draw(self, screen):
         frame = self.frames[self.frame_index]
 
-        base_x = SCREEN_WIDTH // 2 - frame.get_width() // 2
-        base_y = SCREEN_HEIGHT - frame.get_height()
+        base_x = settings.SCREEN_WIDTH // 2 - frame.get_width() // 2 - 120
+        base_y = settings.SCREEN_HEIGHT - frame.get_height()
 
         offset_x = math.sin(self.bob_time) * self.bob_amount_x
         offset_y = abs(math.cos(self.bob_time)) * self.bob_amount_y
@@ -124,16 +145,10 @@ class Weapon:
         screen.blit(frame, (weapon_x, weapon_y))
 
         if self.show_blast:
-            self.draw_blast(screen)
+            self.draw_blast(screen, weapon_x, weapon_y)
 
-    def draw_blast(self, screen):
-        # Horizontal shift → right
-        offset_x = 90  # increase for more right
-
-        # Vertical shift → up (further away)
-        offset_y = -60  # more negative = further away
-
-        blast_x = SCREEN_WIDTH // 2 - self.blast_image.get_width() // 2 + offset_x
-        blast_y = SCREEN_HEIGHT // 2 - self.blast_image.get_height() // 2 + offset_y
+    def draw_blast(self, screen, weapon_x, weapon_y):
+        blast_x = weapon_x + 80
+        blast_y = weapon_y - 140
 
         screen.blit(self.blast_image, (blast_x, blast_y))

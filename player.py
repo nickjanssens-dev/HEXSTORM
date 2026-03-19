@@ -3,7 +3,6 @@ import pygame
 
 from map import is_wall
 
-
 class Player:
     def __init__(self, x, y, angle, speed, rot_speed):
         self.x = x
@@ -13,13 +12,22 @@ class Player:
         self.rot_speed = rot_speed
 
         self.health = 100
-        self.mana = 100
+        self.max_mana = 2000
+        self.mana = self.max_mana
+        self.regen_rate = 50 # mana per second
         self.current_spell = "Firebolt"
 
         self.is_moving = False
         self.shooting = False
 
+        # NEW
+        self.alive = True
+
     def movement(self):
+        # Don't move if dead
+        if not self.alive:
+            return
+
         keys = pygame.key.get_pressed()
 
         sin_a = math.sin(self.angle)
@@ -28,7 +36,6 @@ class Player:
         dx = 0
         dy = 0
 
-        # Forward / backward
         if keys[pygame.K_UP]:
             dx += cos_a * self.speed
             dy += sin_a * self.speed
@@ -36,7 +43,6 @@ class Player:
             dx -= cos_a * self.speed
             dy -= sin_a * self.speed
 
-        # Strafe left / right
         if keys[pygame.K_LEFT]:
             dx += sin_a * self.speed
             dy -= cos_a * self.speed
@@ -44,7 +50,6 @@ class Player:
             dx -= sin_a * self.speed
             dy += cos_a * self.speed
 
-        # Rotate camera
         if keys[pygame.K_s]:
             self.angle -= self.rot_speed
         if keys[pygame.K_d]:
@@ -65,6 +70,24 @@ class Player:
             self.y = new_y
 
     def take_damage(self, amount):
+        if not self.alive:
+            return
+
         self.health -= amount
+
+        # Optional: clamp
         if self.health < 0:
             self.health = 0
+
+        # Death handling
+        if self.health == 0:
+            self.alive = False
+
+    def regenerate_mana(self, dt):
+        if not self.alive:
+            return
+            
+        if self.mana < self.max_mana:
+            self.mana += self.regen_rate * (dt / 1000.0)
+            if self.mana > self.max_mana:
+                self.mana = self.max_mana
