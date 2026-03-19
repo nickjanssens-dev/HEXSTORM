@@ -142,19 +142,9 @@ class Enemy:
             dx = player.x - self.x
             dy = player.y - self.y
             distance = math.hypot(dx, dy)
-            
-            # Check if enemy is far from player or not in line of sight
-            has_los = check_line_of_sight(self.x, self.y, player.x, player.y)
-            distance_tiles = distance / settings.TILE_SIZE
-            
-            # Determine speed multiplier: 10x faster when far or not in sight
-            if distance_tiles > 5 or not has_los:
-                speed_multiplier = 10.0
-            else:
-                speed_multiplier = 1.0
 
             if distance > 10:
-                current_speed = self.speed * self.slow_factor * speed_multiplier
+                current_speed = self.speed * self.slow_factor
                 new_x = self.x + (dx / distance) * current_speed * dt
                 new_y = self.y + (dy / distance) * current_speed * dt
 
@@ -215,11 +205,7 @@ class Enemy:
         if corrected_depth < 0.1:
             corrected_depth = 0.1
 
-        sprite_height = (35 / corrected_depth) * settings.DIST_TO_PROJ_PLANE  # Increased from 25 to 35 for better visibility
-        
-        # Apply sprite scale if enemy has one
-        if hasattr(self, 'sprite_scale'):
-            sprite_height *= self.sprite_scale
+        sprite_height = (25 / corrected_depth) * settings.DIST_TO_PROJ_PLANE
 
         orig_w, orig_h = self.current_sprite.get_size()
         aspect_ratio = orig_w / orig_h
@@ -236,10 +222,6 @@ class Enemy:
         screen_y = settings.SCREEN_HEIGHT // 2 - sprite_height // 2
 
         step = orig_w / max(1.0, float(sprite_width))
-        
-        # Determine if sprite should be flipped horizontally
-        # Flip if enemy is to the left of player's view
-        should_flip = angle_to_player > 0
 
         for i in range(int(sprite_width)):
             pixel_x = int(screen_x - half_width + i)
@@ -249,11 +231,7 @@ class Enemy:
 
                 if 0 <= ray_idx < len(depth_buffer):
                     if corrected_depth < depth_buffer[ray_idx]:
-                        # Calculate texture x-coordinate with flip consideration
-                        if should_flip:
-                            tex_x = orig_w - 1 - int(i * step)
-                        else:
-                            tex_x = int(i * step)
+                        tex_x = int(i * step)
 
                         if 0 <= tex_x < orig_w:
                             column = self.current_sprite.subsurface(
@@ -328,9 +306,7 @@ class Skeleton(Enemy):
         self.speed = 0.02
         self.health = 200
         self.damage = 15
-        self.anim_speed = 0.015  # Slower animation speed for better visibility
-        self.frame_size = 64  # Explicitly set frame size for skeleton
-        self.sprite_scale = 2.0  # Make skeleton 2x larger to compensate for small sprite content
+        self.anim_speed = 0.025
 
         if not Skeleton._animations_cache:
             Skeleton._animations_cache = {
@@ -348,25 +324,7 @@ class Skeleton(Enemy):
         path = os.path.join("assets", "textures", "enemy", "Skeletons_Free_Pack", "Skeletons_Free_Pack", "Skeleton_Sword", "Skeleton_White", "Skeleton_Without_VFX", filename)
         try:
             sheet = pygame.image.load(path).convert_alpha()
-            sheet_w, sheet_h = sheet.get_size()
-            
-            # Calculate actual frame width for this specific sprite sheet
-            # Most frames are 64x64, but some sheets have extra padding
-            if filename in ["Skeleton_01_White_Attack2.png", "Skeleton_01_White_Hurt.png", "Skeleton_01_White_Die.png"]:
-                # These have 32 pixel padding, so use (width - 32) // frame_count
-                if filename == "Skeleton_01_White_Attack2.png":
-                    frame_count = 13
-                elif filename == "Skeleton_01_White_Hurt.png":
-                    frame_count = 7
-                elif filename == "Skeleton_01_White_Die.png":
-                    frame_count = 19
-                
-                actual_frame_width = (sheet_w - 32) // frame_count
-                return self._slice_sheet(sheet, actual_frame_width)
-            else:
-                # Use standard 64px frame width for well-formed sheets
-                return self._slice_sheet(sheet, 64)
-                
+            return self._slice_sheet(sheet, sheet.get_height())
         except Exception as e:
             fail = pygame.Surface((64, 64))
             fail.fill((255, 0, 255))

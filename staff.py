@@ -21,7 +21,7 @@ class Staff:
         self.bob_amount_y = 5
 
         # Spell selection
-        self.current_spell = "fireball"
+        self.current_spell = "Inferno burst"
 
         # Casting cooldown
         self.cast_cooldown = 400  # milliseconds
@@ -101,11 +101,11 @@ class Staff:
         spawn_x, spawn_y, angle = self.spawn_data
         self.spawn_data = None
 
-        if self.current_spell == "fireball":
+        if self.current_spell == "Inferno burst":
             if self.fire_sound:
                 self.fire_sound.play()
             return Fireball(spawn_x, spawn_y, angle)
-        elif self.current_spell == "ice":
+        elif self.current_spell == "Ice shards":
             if self.ice_sound:
                 self.ice_sound.play()
             return IceShard(spawn_x, spawn_y, angle)
@@ -138,9 +138,9 @@ class Staff:
         self.spawn_data = (spawn_x, spawn_y, player.angle)
 
     def get_mana_cost(self):
-        if self.current_spell == "fireball":
+        if self.current_spell == "Inferno burst":
             return 50
-        elif self.current_spell == "ice":
+        elif self.current_spell == "Ice shards":
             return 30
         return 0
 

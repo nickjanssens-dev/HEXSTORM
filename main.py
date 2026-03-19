@@ -38,6 +38,8 @@ ensure_dependencies()
 
 import pygame
 
+import pygame
+
 from background import draw_background
 from hud import draw_hud, load_hud, get_fullscreen_button_rect
 from player import Player
@@ -62,6 +64,16 @@ from settings import (
 )
 from map import get_free_pos, game_map, TILE_SIZE, is_wall
 from sprite import Sprite, render_sprites
+
+import subprocess
+import threading
+import queue
+import sys
+
+
+STATE_MENU = "menu"
+STATE_PLAYING = "playing"
+STATE_GAME_OVER = "game_over"
 
 
 STATE_MENU = "menu"
@@ -131,8 +143,7 @@ def create_enemies(player=None, amount=3):
                     dx = enemy_x - player.x
                     dy = enemy_y - player.y
                     dist = math.hypot(dx, dy)
-                    # Spawn enemies closer but not too close: 150-500 pixels away
-                    if dist < 150 or dist > 500:
+                    if dist < 200 or dist > 1000:
                         continue
 
                 enemies.append(random.choice([Bat, Skeleton, Slime])(enemy_x, enemy_y))
@@ -235,6 +246,27 @@ def toggle_fullscreen(screen):
     )
 
 
+def read_webcam_output(process, q):
+    """Reads stdout from the webcam subprocess and puts results in a queue."""
+    try:
+        for line in iter(process.stdout.readline, ""):
+            decoded_line = line.strip()
+            if "+++ GAME_RESULT:" in decoded_line:
+                # Extract the spell name from +++ GAME_RESULT: <Name> +++
+                spell_name = decoded_line.split("+++ GAME_RESULT:")[1].split("+++")[0].strip()
+                q.put(spell_name)
+            elif decoded_line.startswith("ERROR:"):
+                print(f"WEBCAM ERROR: {decoded_line}")
+            elif decoded_line.startswith("AI DETECTION:") or decoded_line.startswith("Detected") or "Confidence dropped" in decoded_line:
+                # Only print occasionally to avoid spam, or just print it if you want real-time logs
+                # In this case we'll print it to show it's scanning
+                print(f"WEBCAM: {decoded_line}")
+    except Exception as e:
+        print(f"DEBUG: Webcam reader error: {e}")
+    finally:
+        process.stdout.close()
+
+
 def main():
     pygame.init()
 
@@ -268,6 +300,33 @@ def main():
     selected_option = 0
 
     running = True
+    
+    # --- Webcam Subprocess Setup ---
+    webcam_process = None
+    webcam_queue = queue.Queue()
+    
+    try:
+        # Launching the webcam classifier as a separate process
+        # Using sys.executable to ensure the same Python environment is used
+        webcam_process = subprocess.Popen(
+            [sys.executable, "webcam_classifier.py"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, # Capture errors in stdout
+            text=True,
+            bufsize=1
+        )
+        
+        # Start a background thread to read the output
+        webcam_thread = threading.Thread(
+            target=read_webcam_output, 
+            args=(webcam_process, webcam_queue),
+            daemon=True
+        )
+        webcam_thread.start()
+        print("DEBUG: Webcam subprocess started.")
+    except Exception as e:
+        print(f"DEBUG: Could not start webcam subprocess: {e}")
+
     while running:
         dt = clock.tick(FPS)
 
@@ -303,10 +362,10 @@ def main():
 
                 elif game_state == STATE_PLAYING:
                     if event.key == pygame.K_1:
-                        staff.current_spell = "fireball"
+                        staff.current_spell = "Inferno burst"
 
                     elif event.key == pygame.K_2:
-                        staff.current_spell = "ice"
+                        staff.current_spell = "Ice shards"
 
                     elif event.key == pygame.K_f:
                         staff.cast(player)
@@ -315,6 +374,24 @@ def main():
                     if event.key == pygame.K_r:
                         player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills = reset_game()
                         game_state = STATE_PLAYING
+
+        # Check for spells from the webcam
+        if game_state == STATE_PLAYING:
+            try:
+                # Poll the queue for NEW spell detections
+                while not webcam_queue.empty():
+                    spell_detected = webcam_queue.get_nowait()
+                    print(f"DEBUG: Webcam triggered: {spell_detected}")
+                    
+                    if spell_detected == "Ice shards":
+                        staff.current_spell = "Ice shards"
+                        staff.cast(player)
+                    elif spell_detected == "Inferno burst":
+                        staff.current_spell = "Inferno burst"
+                        staff.cast(player)
+                    # Add more mappings here for other labels if needed
+            except queue.Empty:
+                pass
 
         if game_state == STATE_PLAYING:
             for explosion in explosions:
@@ -433,6 +510,15 @@ def main():
             draw_game_over(screen)
 
         pygame.display.flip()
+
+    # Clean up webcam process
+    if webcam_process:
+        print("DEBUG: Terminating webcam subprocess...")
+        webcam_process.terminate()
+        try:
+            webcam_process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            webcam_process.kill()
 
     pygame.quit()
 
