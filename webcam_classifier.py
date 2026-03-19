@@ -34,9 +34,9 @@ class_names = open(LABELS_PATH, "r").readlines()
 SHOW_WINDOW = True
 
 # CAMERA can be 0 or 1 based on default camera of your computer
-camera = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 if not camera.isOpened():
-    camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    camera = cv2.VideoCapture(1, cv2.CAP_DSHOW)
 
 if not camera.isOpened():
     print("ERROR: Could not open any webcam.")
@@ -46,14 +46,12 @@ if not camera.isOpened():
 # Create the array of the right shape to feed into the keras model
 data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
 
-# Timing variables - making them slightly more forgiving than before
-target_confidence = 0.85 
-required_duration = 2.0  
-delay_between_cards = 1.0 
+# Timing variables
+confidence_threshold = 0.85
+no_card_threshold = 0.80
 
 current_class = None
-start_time = None
-cooldown_end_time = 0
+last_fired_class = None
 
 print("Webcam initialized. Press 'esc' to exit.")
 sys.stdout.flush()
@@ -101,39 +99,21 @@ try:
         # Log detections to terminal for transparency
         sys.stderr.write(f"\rAI DETECTION: {class_name[2:]} ({confidence_score:.2f})")
         
-        # Check if we are in cooldown
-        current_time = time.time()
-        if current_time < cooldown_end_time:
-            # remaining_cooldown = cooldown_end_time - current_time
-            pass
+        class_name_clean = class_name[2:].strip()
+        is_no_card = (class_name_clean == "No card")
+        
+        # State machine: ready OR waiting for no card
+        if last_fired_class is None:
+            # Ready to fire - detect any card (not "No card") with high confidence
+            if not is_no_card and confidence_score >= confidence_threshold:
+                # Fire immediately!
+                print(f"\n+++ GAME_RESULT: {class_name_clean} +++")
+                sys.stdout.flush()
+                last_fired_class = class_name_clean
         else:
-            # Check for high confidence
-            if confidence_score >= target_confidence:
-                if current_class != index:
-                    # New class detected with high confidence
-                    current_class = index
-                    start_time = current_time
-                    print(f"Detected {class_name[2:]}... Hold for {required_duration}s")
-                    sys.stdout.flush()
-                else:
-                    # Same class detected, check duration
-                    elapsed = current_time - start_time
-                    if elapsed >= required_duration:
-                        # Success result format: +++ GAME_RESULT: <Name> +++
-                        print(f"\n+++ GAME_RESULT: {class_name[2:]} +++")
-                        sys.stdout.flush()
-
-                        # Set cooldown for the next card
-                        cooldown_end_time = current_time + delay_between_cards
-                        current_class = None
-                        start_time = None
-            else:
-                # Confidence dropped, reset timer
-                if current_class is not None:
-                    print(f"\nConfidence dropped ({confidence_score:.2f}). Resetting timer.")
-                    sys.stdout.flush()
-                    current_class = None
-                    start_time = None
+            # Waiting for "No card" to reset
+            if is_no_card and confidence_score >= no_card_threshold:
+                last_fired_class = None
 
         # Small sleep
         time.sleep(0.01)

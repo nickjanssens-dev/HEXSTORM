@@ -106,6 +106,7 @@ def draw_minimap(screen, player, enemies):
 def draw_hud(screen, player, wave=None, kills=None, game_over=False, enemies=None):
     import settings
     import math
+    import time
     hud_x = 0
     hud_y = settings.SCREEN_HEIGHT - HUD_HEIGHT
 
@@ -120,6 +121,35 @@ def draw_hud(screen, player, wave=None, kills=None, game_over=False, enemies=Non
     draw_text(screen, font, f"HP: {player.health}", (255, 70, 70), 80, text_y)
     draw_text(screen, font, f"MP: {int(player.mana)}", (80, 170, 255), 200, text_y)
     #draw_text(screen, font, f"Spell: {player.current_spell}", (255, 245, 140), 720, text_y)
+
+    # Draw colored effects when damage reduction or healing is active
+    current_time = time.time()
+    if hasattr(player, 'damage_reduction_end_time') and player.damage_reduction_end_time > current_time:
+        if player.damage_reduction == 0.5:  # Arcane bulwark (50% reduction)
+            # Pulsing purple glow effect
+            pulse = abs(math.sin(current_time * 3))  # Pulse speed
+            alpha = int(50 + pulse * 30)  # Alpha between 20-50
+            
+            # Create purple glow overlay
+            glow_surface = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
+            glow_surface.fill((128, 0, 128, alpha))  # Purple color with alpha
+            screen.blit(glow_surface, (0, 0))
+        elif player.damage_reduction == 1.0:  # Void bulwark (100% immunity)
+            # Pulsing gold glow effect
+            pulse = abs(math.sin(current_time * 3))  # Pulse speed
+            alpha = int(50 + pulse * 30)  # Alpha between 20-50
+            
+            # Create gold glow overlay
+            glow_surface = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
+            glow_surface.fill((255, 215, 0, alpha))  # Gold color with alpha
+            screen.blit(glow_surface, (0, 0))
+
+    # Check for recent healing (green flash for 1 second)
+    if hasattr(player, 'heal_time') and current_time - player.heal_time < 1.0:
+        alpha = int(100 * (1.0 - (current_time - player.heal_time)))  # Fade out over 1 second
+        green_surface = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT), pygame.SRCALPHA)
+        green_surface.fill((0, 255, 0, alpha))  # Green color with alpha
+        screen.blit(green_surface, (0, 0))
 
     draw_fullscreen_button(screen)
 

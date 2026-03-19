@@ -110,13 +110,21 @@ class Staff:
                 self.ice_sound.play()
             return IceShard(spawn_x, spawn_y, angle)
         elif self.current_spell == "Healing touch":
-            player.health = min(100, player.health + 40)
+            player.health = player.max_health if hasattr(player, 'max_health') else 100
+            player.heal_time = time.time()  # Track healing time for green flash
+            print(f"Healing touch: Restored to full health!")
             return None
         elif self.current_spell == "Void bulwark":
-            player.shield += 100
+            import time
+            player.damage_reduction = 1.0  # 100% immunity
+            player.damage_reduction_end_time = time.time() + 15  # 15 seconds
+            print(f"Void bulwark: Immune to damage for 15 seconds")
             return None
         elif self.current_spell == "Arcane bulwark":
-            player.shield += 50
+            import time
+            player.damage_reduction = 0.5  # 50% damage reduction
+            player.damage_reduction_end_time = time.time() + 10  # 10 seconds
+            print(f"Arcane bulwark: 50% damage reduction for 10 seconds")
             return None
 
     def cast(self, player):
@@ -149,15 +157,15 @@ class Staff:
 
     def get_mana_cost(self):
         if self.current_spell == "Inferno burst":
-            return 50
+            return 800
         elif self.current_spell == "Ice shards":
-            return 30
+            return 150
         elif self.current_spell == "Healing touch":
-            return 40
+            return 600
         elif self.current_spell == "Void bulwark":
-            return 80
+            return 800
         elif self.current_spell == "Arcane bulwark":
-            return 60
+            return 400
         return 0
 
     def can_cast(self, player):

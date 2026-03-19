@@ -23,6 +23,10 @@ class Player:
         # NEW
         self.alive = True
         self.shield = 0
+        
+        # Damage reduction
+        self.damage_reduction = 0.0  # 0.0 = no reduction, 0.5 = 50% reduction
+        self.damage_reduction_end_time = 0  # When the buff expires
 
     def movement(self):
         # Don't move if dead
@@ -74,6 +78,10 @@ class Player:
         if not self.alive:
             return
 
+        # Apply damage reduction if active
+        if self.damage_reduction > 0:
+            amount *= (1.0 - self.damage_reduction)
+
         if self.shield > 0:
             if self.shield >= amount:
                 self.shield -= amount
@@ -91,6 +99,15 @@ class Player:
         # Death handling
         if self.health == 0:
             self.alive = False
+
+    def update_damage_reduction(self, current_time):
+        """Check if damage reduction buff has expired"""
+        if self.damage_reduction_end_time > 0 and current_time >= self.damage_reduction_end_time:
+            self.damage_reduction = 0.0
+            self.damage_reduction_end_time = 0
+
+    def update(self, current_time):
+        self.update_damage_reduction(current_time)
 
     def regenerate_mana(self, dt):
         if not self.alive:

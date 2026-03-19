@@ -37,7 +37,7 @@ ensure_dependencies()
 import pygame
 
 from background import draw_background
-from hud import draw_hud, load_hud, get_fullscreen_button_rect
+from hud import draw_hud, load_hud, get_fullscreen_button_rect, draw_fullscreen_button
 from player import Player
 from raycasting import ray_casting
 from weapon import Weapon
@@ -428,26 +428,82 @@ def main():
         # Check for spells from the webcam
         if game_state == STATE_PLAYING:
             try:
-                # Poll the queue for NEW spell detections
+                # Poll queue for NEW spell detections
                 while not webcam_queue.empty():
                     spell_detected = webcam_queue.get_nowait()
                     print(f"DEBUG: Webcam triggered: {spell_detected}")
                     
                     if spell_detected == "Ice shards":
                         staff.current_spell = "Ice shards"
-                        staff.cast(player)
+                        # Deduct mana cost
+                        mana_cost = staff.get_mana_cost()
+                        if player.mana >= mana_cost:
+                            player.mana -= mana_cost
+                            forward_distance = 60 
+                            right_offset = 8
+                            spawn_x = (
+                                player.x
+                                + math.cos(player.angle) * forward_distance
+                                + math.cos(player.angle + math.pi / 2) * right_offset
+                            )
+                            spawn_y = (
+                                player.y
+                                + math.sin(player.angle) * forward_distance
+                                + math.sin(player.angle + math.pi / 2) * right_offset
+                            )
+                            staff.spawn_data = (spawn_x, spawn_y, player.angle)
+                            projectile = staff._spawn_projectile(player)
+                            if projectile:
+                                projectiles.append(projectile)
                     elif spell_detected == "Inferno burst":
                         staff.current_spell = "Inferno burst"
-                        staff.cast(player)
+                        # Deduct mana cost
+                        mana_cost = staff.get_mana_cost()
+                        if player.mana >= mana_cost:
+                            player.mana -= mana_cost
+                            forward_distance = 60 
+                            right_offset = 8
+                            spawn_x = (
+                                player.x
+                                + math.cos(player.angle) * forward_distance
+                                + math.cos(player.angle + math.pi / 2) * right_offset
+                            )
+                            spawn_y = (
+                                player.y
+                                + math.sin(player.angle) * forward_distance
+                                + math.sin(player.angle + math.pi / 2) * right_offset
+                            )
+                            staff.spawn_data = (spawn_x, spawn_y, player.angle)
+                            projectile = staff._spawn_projectile(player)
+                            if projectile:
+                                projectiles.append(projectile)
                     elif spell_detected == "Healing touch":
                         staff.current_spell = "Healing touch"
-                        staff.cast(player)
+                        mana_cost = staff.get_mana_cost()
+                        if player.mana >= mana_cost:
+                            player.mana -= mana_cost
+                            player.health = 100  # Full health
+                            import time
+                            player.heal_time = time.time()  # Track healing time for green flash
+                            print(f"Healing touch: Restored to full health!")
                     elif spell_detected == "Void bulwark":
                         staff.current_spell = "Void bulwark"
-                        staff.cast(player)
+                        mana_cost = staff.get_mana_cost()
+                        if player.mana >= mana_cost:
+                            player.mana -= mana_cost
+                            import time
+                            player.damage_reduction = 1.0  # 100% immunity
+                            player.damage_reduction_end_time = time.time() + 15  # 15 seconds
+                            print(f"Void bulwark: Immune to damage for 15 seconds")
                     elif spell_detected == "Arcane bulwark":
                         staff.current_spell = "Arcane bulwark"
-                        staff.cast(player)
+                        mana_cost = staff.get_mana_cost()
+                        if player.mana >= mana_cost:
+                            player.mana -= mana_cost
+                            import time
+                            player.damage_reduction = 0.5  # 50% damage reduction
+                            player.damage_reduction_end_time = time.time() + 10  # 10 seconds
+                            print(f"Arcane bulwark: 50% damage reduction for 10 seconds")
                     # Add more mappings here for other labels if needed
             except queue.Empty:
                 pass
@@ -458,6 +514,7 @@ def main():
             explosions = [e for e in explosions if e.alive]
 
             player.movement()
+            player.update(pygame.time.get_ticks())  # Update damage reduction
             player.regenerate_mana(dt)
             weapon.update(dt, player, enemies)
             new_projectile = staff.update(dt, player)
