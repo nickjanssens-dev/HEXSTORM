@@ -76,11 +76,6 @@ STATE_PLAYING = "playing"
 STATE_GAME_OVER = "game_over"
 
 
-STATE_MENU = "menu"
-STATE_PLAYING = "playing"
-STATE_GAME_OVER = "game_over"
-
-
 def load_textures():
     wall_texture = pygame.image.load(WALL_TEXTURE_PATH).convert()
     poster_texture = pygame.image.load(POSTER_TEXTURE_PATH).convert()
@@ -104,7 +99,10 @@ def load_menu_background():
     return pygame.transform.scale(image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 
-def create_decor_sprites(amount=30):
+def create_decor_sprites(amount=30, used_tiles=None):
+    if used_tiles is None:
+        used_tiles = set()
+
     sprites = []
 
     # Try loading all 3 decor textures
@@ -140,7 +138,8 @@ def create_decor_sprites(amount=30):
             sx = random.randint(1, len(game_map[0]) - 2)
             sy = random.randint(1, len(game_map) - 2)
 
-            if game_map[sy][sx] == 0:
+            if game_map[sy][sx] == 0 and (sx, sy) not in used_tiles:
+                used_tiles.add((sx, sy))
                 sprite_x = sx * TILE_SIZE + TILE_SIZE // 2
                 sprite_y = sy * TILE_SIZE + TILE_SIZE // 2
                 tex = random.choice(textures)
@@ -150,7 +149,10 @@ def create_decor_sprites(amount=30):
     return sprites
 
 
-def create_enemies(player=None, amount=8):
+def create_enemies(player=None, amount=8, used_tiles=None):
+    if used_tiles is None:
+        used_tiles = set()
+
     enemies = []
 
     for _ in range(amount):
@@ -158,7 +160,7 @@ def create_enemies(player=None, amount=8):
             sx = random.randint(1, len(game_map[0]) - 2)
             sy = random.randint(1, len(game_map) - 2)
 
-            if game_map[sy][sx] == 0:
+            if game_map[sy][sx] == 0 and (sx, sy) not in used_tiles:
                 enemy_x = sx * TILE_SIZE + TILE_SIZE // 2
                 enemy_y = sy * TILE_SIZE + TILE_SIZE // 2
 
@@ -169,6 +171,7 @@ def create_enemies(player=None, amount=8):
                     if dist < 200 or dist > 1000:
                         continue
 
+                used_tiles.add((sx, sy))
                 enemies.append(random.choice([Bat, Skeleton, Slime])(enemy_x, enemy_y))
                 break
 
@@ -246,8 +249,10 @@ def reset_game():
         PLAYER_ROT_SPEED
     )
 
-    sprites = create_decor_sprites(30)
-    enemies = create_enemies(player, 8)
+    # Share a used_tiles set so decor sprites and enemies never land on the same tile
+    used_tiles = set()
+    sprites = create_decor_sprites(30, used_tiles=used_tiles)
+    enemies = create_enemies(player, 8, used_tiles=used_tiles)
     explosions = []
 
     weapon = Weapon()
@@ -296,16 +301,33 @@ def read_webcam_output(process, q):
 def main():
     pygame.init()
 
+    soundtrack_path = os.path.join("assets", "textures", "sounds", "soundtrack.wav")
+    no_mercy_path = os.path.join("assets", "textures", "sounds", "no-mercy.wav")
+
     try:
-        music_path = os.path.join("assets", "textures", "sounds", "soundtrack.wav")
-        if os.path.exists(music_path):
-            pygame.mixer.music.load(music_path)
+        if os.path.exists(soundtrack_path):
+            pygame.mixer.music.load(soundtrack_path)
             pygame.mixer.music.set_volume(0.3)
             pygame.mixer.music.play(-1)
         else:
-            print(f"DEBUG: Soundtrack NOT FOUND at {music_path}")
+            print(f"DEBUG: Soundtrack NOT FOUND at {soundtrack_path}")
     except Exception as e:
         print(f"DEBUG: Could not load soundtrack: {e}")
+
+    # Load no-mercy as a Sound so it plays on a separate channel (soundtrack keeps looping)
+    no_mercy_sound = None
+    game_over_sound = None
+    try:
+        if os.path.exists(no_mercy_path):
+            no_mercy_sound = pygame.mixer.Sound(no_mercy_path)
+            no_mercy_sound.set_volume(0.65)
+        
+        game_over_path = os.path.join("assets", "textures", "sounds", "player_game_over.mp3")
+        if os.path.exists(game_over_path):
+            game_over_sound = pygame.mixer.Sound(game_over_path)
+            game_over_sound.set_volume(0.8)
+    except Exception as e:
+        print(f"DEBUG: Sound loading failed: {e}")
 
     flags = pygame.SCALED
     if FULLSCREEN:
@@ -369,6 +391,7 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
+
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1 and game_state == STATE_PLAYING:
                     if get_fullscreen_button_rect().collidepoint(event.pos):
@@ -391,6 +414,9 @@ def main():
                         if choice == "PLAY":
                             player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills = reset_game()
                             game_state = STATE_PLAYING
+                            # Play no-mercy over the soundtrack (separate channel)
+                            if no_mercy_sound:
+                                no_mercy_sound.play()
 
                         elif choice == "QUIT":
                             running = False
@@ -572,7 +598,10 @@ def main():
                 enemies.extend(create_enemies(player, 5 + wave * 2))
 
             if player.health <= 0:
-                game_state = STATE_GAME_OVER
+                if game_state != STATE_GAME_OVER:
+                    game_state = STATE_GAME_OVER
+                    if game_over_sound:
+                        game_over_sound.play()
 
         if game_state == STATE_MENU:
             draw_menu(screen, menu_background, selected_option, menu_options)
