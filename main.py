@@ -374,11 +374,11 @@ def main():
                 explosion.draw(screen, player, depth_buffer)
 
             for enemy in enemies:
-                enemy.draw(screen, player)
+                enemy.draw(screen, player, depth_buffer)
 
             weapon.draw(screen)
             staff.draw(screen)
-            draw_hud(screen, player, wave=wave, kills=kills, game_over=False)
+            draw_hud(screen, player, wave=wave, kills=kills, game_over=False, enemies=enemies)
 
         elif game_state == STATE_GAME_OVER:
             draw_background(screen, sky_texture, grass_texture, player)
@@ -390,11 +390,11 @@ def main():
                 explosion.draw(screen, player, depth_buffer)
 
             for enemy in enemies:
-                enemy.draw(screen, player)
+                enemy.draw(screen, player, depth_buffer)
 
             weapon.draw(screen)
             staff.draw(screen)
-            draw_hud(screen, player, wave=wave, kills=kills, game_over=True)
+            draw_hud(screen, player, wave=wave, kills=kills, game_over=True, enemies=enemies)
             draw_game_over(screen)
 
         pygame.display.flip()

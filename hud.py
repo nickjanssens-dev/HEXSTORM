@@ -56,8 +56,9 @@ def draw_text(screen, font, text, color, x, y):
     screen.blit(main, (x + 1, y))
     screen.blit(main, (x, y + 1))
 
-def draw_hud(screen, player, wave=None, kills=None, game_over=False):
+def draw_hud(screen, player, wave=None, kills=None, game_over=False, enemies=None):
     import settings
+    import math
     hud_x = 0
     hud_y = settings.SCREEN_HEIGHT - HUD_HEIGHT
 
@@ -72,6 +73,49 @@ def draw_hud(screen, player, wave=None, kills=None, game_over=False):
     draw_text(screen, font, f"Spell: {player.current_spell}", (255, 245, 140), 720, text_y)
 
     draw_fullscreen_button(screen)
+
+    # --- Draw Compass to Closest Enemy ---
+    if enemies:
+        closest_enemy = None
+        min_dist = float('inf')
+        for e in enemies:
+            dx = e.x - player.x
+            dy = e.y - player.y
+            dist = math.hypot(dx, dy)
+            if dist < min_dist:
+                min_dist = dist
+                closest_enemy = e
+
+        if closest_enemy:
+            dx = closest_enemy.x - player.x
+            dy = closest_enemy.y - player.y
+            
+            # Angle relative to player's looking direction
+            # If enemy is straight ahead, angle_diff = 0
+            angle_diff = math.atan2(dy, dx) - player.angle
+            
+            # To draw on screen, 0 should point UP.
+            # On screen Y axis is down. So UP is angle -pi/2
+            display_angle = angle_diff - math.pi / 2
+            
+            cx = settings.SCREEN_WIDTH // 2
+            cy = settings.SCREEN_HEIGHT - HUD_HEIGHT // 2
+            
+            size = 20
+            tip_x = cx + math.cos(display_angle) * size
+            tip_y = cy + math.sin(display_angle) * size
+            
+            base_angle1 = display_angle + math.pi * 0.8
+            base_angle2 = display_angle - math.pi * 0.8
+            
+            base1_x = cx + math.cos(base_angle1) * size * 0.7
+            base1_y = cy + math.sin(base_angle1) * size * 0.7
+            base2_x = cx + math.cos(base_angle2) * size * 0.7
+            base2_y = cy + math.sin(base_angle2) * size * 0.7
+            
+            points = [(tip_x, tip_y), (base1_x, base1_y), (base2_x, base2_y)]
+            pygame.draw.polygon(screen, (255, 50, 50), points)
+            pygame.draw.polygon(screen, (255, 200, 200), points, 2)
 
     # --- Draw wave/kills if provided ---
     if wave is not None and kills is not None:
