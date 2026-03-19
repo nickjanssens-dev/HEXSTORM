@@ -4,6 +4,29 @@ import os
 import settings
 from map import is_wall
 
+def check_line_of_sight(x1, y1, x2, y2):
+    dx = x2 - x1
+    dy = y2 - y1
+    dist = math.hypot(dx, dy)
+    if dist < 1:
+        return True
+    
+    steps = int(dist / (settings.TILE_SIZE / 4))
+    if steps == 0:
+        return True
+
+    step_x = dx / steps
+    step_y = dy / steps
+    
+    cx, cy = x1, y1
+    for _ in range(steps):
+        if is_wall(cx, cy):
+            return False
+        cx += step_x
+        cy += step_y
+        
+    return True
+
 class Enemy:
     def __init__(self, x, y):
         self.x = x
@@ -86,7 +109,9 @@ class Enemy:
             dy = player.y - self.y
             distance_tiles = math.hypot(dx, dy) / settings.TILE_SIZE
 
-            if distance_tiles > 10:
+            has_los = check_line_of_sight(self.x, self.y, player.x, player.y)
+
+            if distance_tiles > 10 or not has_los:
                 new_state = "idle"
             elif distance_tiles > 0.5:
                 new_state = "run"
@@ -150,7 +175,7 @@ class Enemy:
         self.slow_factor = factor
         self.slow_timer = duration
 
-    def draw(self, screen, player):
+    def draw(self, screen, player, depth_buffer):
         if not self.current_sprite:
             return
 
@@ -193,21 +218,29 @@ class Enemy:
             sprite_height = settings.SCREEN_HEIGHT * 3
             sprite_width = sprite_height * aspect_ratio
 
-        try:
-            sprite_scaled = pygame.transform.scale(
-                self.current_sprite,
-                (int(sprite_width), int(sprite_height))
-            )
-        except (pygame.error, MemoryError, ValueError):
-            return
+        half_width = sprite_width // 2
+        screen_y = settings.SCREEN_HEIGHT // 2 - sprite_height // 2
 
-        screen_y = settings.SCREEN_HEIGHT // 2 - sprite_scaled.get_height() // 2
+        step = orig_w / max(1.0, float(sprite_width))
 
-        if -sprite_scaled.get_width() < screen_x < settings.SCREEN_WIDTH + sprite_scaled.get_width():
-            screen.blit(
-                sprite_scaled,
-                (screen_x - sprite_scaled.get_width() // 2, screen_y)
-            )
+        for i in range(int(sprite_width)):
+            pixel_x = int(screen_x - half_width + i)
+
+            if 0 <= pixel_x < settings.SCREEN_WIDTH:
+                ray_idx = int(pixel_x // settings.SCALE)
+
+                if 0 <= ray_idx < len(depth_buffer):
+                    if corrected_depth < depth_buffer[ray_idx]:
+                        tex_x = int(i * step)
+
+                        if 0 <= tex_x < orig_w:
+                            column = self.current_sprite.subsurface(
+                                tex_x, 0, 1, orig_h
+                            )
+                            column_scaled = pygame.transform.scale(
+                                column, (1, int(sprite_height))
+                            )
+                            screen.blit(column_scaled, (pixel_x, screen_y))
 
 class Bat(Enemy):
     _animations_cache = {}
