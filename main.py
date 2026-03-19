@@ -1,6 +1,40 @@
 import math
 import os
 import random
+import subprocess
+import sys
+import importlib.util
+
+# Auto-install dependencies if not present
+def ensure_dependencies():
+    """Check and install required dependencies automatically."""
+    missing_deps = []
+    
+    # Check pygame
+    try:
+        importlib.util.find_spec('pygame')
+    except ImportError:
+        missing_deps.append('pygame')
+    
+    # Install missing dependencies
+    if missing_deps:
+        print("HEXSTORM - Installing missing dependencies...")
+        for dep in missing_deps:
+            print(f"Installing {dep}...")
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", dep])
+                print(f"✓ {dep} installed successfully")
+            except subprocess.CalledProcessError:
+                print(f"✗ Failed to install {dep}")
+                print("Please install manually: pip install pygame")
+                sys.exit(1)
+        print("Dependencies installed! Restarting game...")
+        os.execv(sys.executable, ['python'] + sys.argv)
+    
+    return True
+
+# Ensure dependencies before importing pygame
+ensure_dependencies()
 
 import pygame
 
@@ -97,7 +131,8 @@ def create_enemies(player=None, amount=3):
                     dx = enemy_x - player.x
                     dy = enemy_y - player.y
                     dist = math.hypot(dx, dy)
-                    if dist < 200 or dist > 1000:
+                    # Spawn enemies closer but not too close: 150-500 pixels away
+                    if dist < 150 or dist > 500:
                         continue
 
                 enemies.append(random.choice([Bat, Skeleton, Slime])(enemy_x, enemy_y))
