@@ -1,8 +1,6 @@
 import math
 import os
 import random
-import subprocess
-import sys
 import importlib.util
 
 # Auto-install dependencies if not present
@@ -38,15 +36,13 @@ ensure_dependencies()
 
 import pygame
 
-import pygame
-
 from background import draw_background
 from hud import draw_hud, load_hud, get_fullscreen_button_rect, draw_fullscreen_button
 from player import Player
 from raycasting import ray_casting
 from weapon import Weapon
 from staff import Staff
-from enemy import Bat, Skeleton, Slime, Wolf
+from enemy import Bat, Skeleton, Slime, Wolf, Necromancer
 from explosion import Explosion
 from settings import (
     SCREEN_WIDTH,
@@ -70,11 +66,9 @@ import threading
 import queue
 import sys
 
-
 STATE_MENU = "menu"
 STATE_PLAYING = "playing"
 STATE_GAME_OVER = "game_over"
-
 
 def load_textures():
     wall_texture = pygame.image.load(WALL_TEXTURE_PATH).convert()
@@ -92,12 +86,10 @@ def load_textures():
 
     return textures, sky_texture, grass_texture
 
-
 def load_menu_background():
     menu_path = os.path.join("assets", "textures", "menu.png")
     image = pygame.image.load(menu_path).convert()
     return pygame.transform.scale(image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-
 
 def create_decor_sprites(amount=30, used_tiles=None):
     if used_tiles is None:
@@ -148,8 +140,7 @@ def create_decor_sprites(amount=30, used_tiles=None):
 
     return sprites
 
-
-def create_enemies(player=None, amount=8, used_tiles=None):
+def create_enemies(player=None, amount=8, used_tiles=None, wave=1):
     if used_tiles is None:
         used_tiles = set()
 
@@ -172,11 +163,17 @@ def create_enemies(player=None, amount=8, used_tiles=None):
                         continue
 
                 used_tiles.add((sx, sy))
-                enemies.append(random.choice([Bat, Skeleton, Slime, Wolf])(enemy_x, enemy_y))
+                if wave == 5:
+                    enemy_types = [Necromancer]
+                else:
+                    enemy_types = [Bat, Skeleton, Slime, Wolf]
+                    if wave > 4:
+                        enemy_types.append(Necromancer)
+                
+                enemies.append(random.choice(enemy_types)(enemy_x, enemy_y))
                 break
 
     return enemies
-
 
 def draw_game_over(screen):
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -199,7 +196,6 @@ def draw_game_over(screen):
 
     screen.blit(game_over_text, game_over_rect)
     screen.blit(restart_text, restart_rect)
-
 
 def draw_menu(screen, background, selected_option, menu_options):
     screen.blit(background, (0, 0))
@@ -234,10 +230,6 @@ def draw_menu(screen, background, selected_option, menu_options):
     hint_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 60))
     screen.blit(hint_text, hint_rect)
 
-    # Draw fullscreen button
-    draw_fullscreen_button(screen)
-
-
 def reset_game():
     start_x, start_y = get_free_pos()
 
@@ -252,18 +244,18 @@ def reset_game():
     # Share a used_tiles set so decor sprites and enemies never land on the same tile
     used_tiles = set()
     sprites = create_decor_sprites(30, used_tiles=used_tiles)
-    enemies = create_enemies(player, 8, used_tiles=used_tiles)
+    wave = 1
+    # Force 2 enemies if starting at wave 5 for the boss fight
+    enemy_count = 2 if wave == 5 else 8
+    enemies = create_enemies(player, enemy_count, used_tiles=used_tiles, wave=wave)
     explosions = []
 
     weapon = Weapon()
     staff = Staff()
     projectiles = []
-
-    wave = 1
     kills = 0
 
     return player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills
-
 
 def toggle_fullscreen(screen):
     if screen.get_flags() & pygame.FULLSCREEN:
@@ -275,7 +267,6 @@ def toggle_fullscreen(screen):
         (SCREEN_WIDTH, SCREEN_HEIGHT),
         pygame.SCALED | pygame.FULLSCREEN
     )
-
 
 def read_webcam_output(process, q):
     """Reads stdout from the webcam subprocess and puts results in a queue."""
@@ -296,7 +287,6 @@ def read_webcam_output(process, q):
         print(f"DEBUG: Webcam reader error: {e}")
     finally:
         process.stdout.close()
-
 
 def main():
     pygame.init()
@@ -390,7 +380,6 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1 and game_state == STATE_PLAYING:
@@ -595,7 +584,7 @@ def main():
 
             if alive_count == 0:
                 wave += 1
-                enemies.extend(create_enemies(player, 5 + wave * 2))
+                enemies.extend(create_enemies(player, 5 + wave * 2, wave=wave))
 
             if player.health <= 0:
                 if game_state != STATE_GAME_OVER:

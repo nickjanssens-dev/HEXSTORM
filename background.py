@@ -1,6 +1,5 @@
 import math
 import pygame
-
 import settings
 
 # cache

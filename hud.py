@@ -1,7 +1,8 @@
 import os
 import pygame
-
+import math
 import settings
+from map import game_map, TILE_SIZE
 
 HUD_IMAGE = None
 HUD_HEIGHT = 100
@@ -56,12 +57,60 @@ def draw_text(screen, font, text, color, x, y):
     screen.blit(main, (x + 1, y))
     screen.blit(main, (x, y + 1))
 
+
+def draw_minimap(screen, player, enemies):
+    # Positioning
+    map_x, map_y = 20, 100
+    tile_size = 4
+    
+    # Mini-map background
+    minimap_width = len(game_map[0]) * tile_size
+    minimap_height = len(game_map) * tile_size
+    
+    # Draw background/frame
+    pygame.draw.rect(screen, (50, 50, 50), (map_x - 2, map_y - 2, minimap_width + 4, minimap_height + 4))
+    
+    bg_surface = pygame.Surface((minimap_width, minimap_height), pygame.SRCALPHA)
+    bg_surface.fill((0, 0, 0, 180))
+    screen.blit(bg_surface, (map_x, map_y))
+    
+    # Draw walls
+    for y, row in enumerate(game_map):
+        for x, tile in enumerate(row):
+            if tile > 0: # 1, 2, 3 are walls
+                color = (120, 120, 120) if tile == 1 else (160, 140, 100) # Poster/HEXSTORM walls slightly different
+                pygame.draw.rect(screen, color, (map_x + x * tile_size, map_y + y * tile_size, tile_size, tile_size))
+                
+    # Draw enemies
+    if enemies:
+        for enemy in enemies:
+            if enemy.alive:
+                ex = int(enemy.x / TILE_SIZE)
+                ey = int(enemy.y / TILE_SIZE)
+                # Ensure within bounds
+                if 0 <= ex < len(game_map[0]) and 0 <= ey < len(game_map):
+                    pygame.draw.rect(screen, (255, 50, 50), (map_x + ex * tile_size, map_y + ey * tile_size, tile_size, tile_size))
+                
+    # Draw player
+    px = int(player.x / TILE_SIZE)
+    py = int(player.y / TILE_SIZE)
+    if 0 <= px < len(game_map[0]) and 0 <= py < len(game_map):
+        pygame.draw.rect(screen, (50, 255, 50), (map_x + px * tile_size, map_y + py * tile_size, tile_size, tile_size))
+        
+        # Draw player direction
+        line_len = 8
+        dir_x = map_x + px * tile_size + tile_size // 2 + math.cos(player.angle) * line_len
+        dir_y = map_y + py * tile_size + tile_size // 2 + math.sin(player.angle) * line_len
+        pygame.draw.line(screen, (50, 255, 50), (map_x + px * tile_size + tile_size // 2, map_y + py * tile_size + tile_size // 2), (dir_x, dir_y), 2)
+
 def draw_hud(screen, player, wave=None, kills=None, game_over=False, enemies=None):
     import settings
     import math
     import time
     hud_x = 0
     hud_y = settings.SCREEN_HEIGHT - HUD_HEIGHT
+
+    draw_minimap(screen, player, enemies)
 
     screen.blit(HUD_IMAGE, (hud_x, hud_y))
 

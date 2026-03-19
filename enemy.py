@@ -4,7 +4,6 @@ import os
 import settings
 from map import is_wall
 
-
 def check_line_of_sight(x1, y1, x2, y2):
     dx = x2 - x1
     dy = y2 - y1
@@ -41,9 +40,10 @@ class Enemy:
         self.attack_timer = 0
         self.slow_timer = 0
         self.slow_factor = 1.0
+        self.hit_radius = 20
 
-        self.hit_radius = 28
         self.frame_size = 64
+        self.world_height = 25  # Default world height
 
         self.state = "idle"
         self.anim_index = 0.0
@@ -211,7 +211,7 @@ class Enemy:
         if corrected_depth < 0.1:
             corrected_depth = 0.1
 
-        sprite_height = (25 / corrected_depth) * settings.DIST_TO_PROJ_PLANE
+        sprite_height = (self.world_height / corrected_depth) * settings.DIST_TO_PROJ_PLANE
 
         orig_w, orig_h = self.current_sprite.get_size()
         aspect_ratio = orig_w / orig_h
@@ -261,6 +261,7 @@ class Bat(Enemy):
         self.speed = 0.04
         self.health = 100
         self.damage = 10
+        self.hit_radius = 20
         self.frame_size = 64
 
         if not Bat._animations_cache:
@@ -492,6 +493,7 @@ class Slime(Enemy):
         self.speed = 0.015
         self.health = 50
         self.damage = 5
+        self.hit_radius = 25
 
         # Slower animation feels more "squishy"
         self.anim_speed = 0.006
@@ -636,3 +638,85 @@ class Wolf(Enemy):
 
     def get_frames(self):
         return self.animations.get(self.state, self.animations["idle"])
+
+
+class Necromancer(Enemy):
+    _animations_cache = {}
+    _attack_sound = None
+    _death_sound = None
+
+    def __init__(self, x, y):
+        super().__init__(x, y)
+
+        # --- Boss stats ---
+        self.speed = 0.02
+        self.health = 2000
+        self.damage = 25
+
+        # --- Scaling ---
+        self.scale = 2.0
+
+        # --- Collision / visuals (scaled accordingly) ---
+        self.hit_radius = int(35 * self.scale)
+        self.world_height = 150 # int(25 * self.scale)
+        self.y_offset = int(12 * self.scale)
+
+        # --- Animation ---
+        self.anim_speed = 0.015
+
+        if not Necromancer._animations_cache:
+            sheet_path = os.path.join(
+                'assets', 'textures', 'enemy', 'boss',
+                'Necromancer_creativekind-Sheet.png'
+            )
+            sheet = pygame.image.load(sheet_path).convert_alpha()
+
+            # Row mapping:
+            # 0: Idle, 1: Run, 2: Attack, 3: Hurt, 4: Die
+            Necromancer._animations_cache['idle'] = self._load_frames(sheet, 0, 8, 160, 128)
+            Necromancer._animations_cache['run'] = self._load_frames(sheet, 1, 8, 160, 128)
+            Necromancer._animations_cache['attack'] = self._load_frames(sheet, 2, 13, 160, 128)
+            Necromancer._animations_cache['hurt'] = self._load_frames(sheet, 3, 13, 160, 128)
+            Necromancer._animations_cache['die'] = self._load_frames(sheet, 4, 17, 160, 128)
+
+            try:
+                snd_dir = os.path.join("assets", "textures", "sounds", "enemy_sounds")
+                att_path = os.path.join(snd_dir, "swoosh.mp3")
+                if os.path.exists(att_path):
+                    Necromancer._attack_sound = pygame.mixer.Sound(att_path)
+                
+                die_path = os.path.join(snd_dir, "necro_over.wav")
+                if os.path.exists(die_path):
+                    Necromancer._death_sound = pygame.mixer.Sound(die_path)
+            except:
+                pass
+
+        self.animations = Necromancer._animations_cache
+        self.current_sprite = self.animations[self.state][0]
+
+    def _load_frames(self, sheet, row_idx, count, frame_w, frame_h):
+        frames = []
+
+        for i in range(count):
+            rect = (i * frame_w, row_idx * frame_h, frame_w, frame_h)
+            frame = sheet.subsurface(rect).copy()
+
+            # 🔥 Proper scalable resizing
+            scaled_w = int(frame_w * self.scale)
+            scaled_h = int(frame_h * self.scale)
+
+            frame = pygame.transform.smoothscale(frame, (scaled_w, scaled_h))
+            frames.append(frame)
+
+        return frames
+
+    def get_frames(self):
+        return self.animations.get(self.state, self.animations["idle"])
+
+    def play_attack_sound(self):
+        if Necromancer._attack_sound:
+            Necromancer._attack_sound.play()
+
+    def play_death_sound(self):
+        if Necromancer._death_sound:
+            Necromancer._death_sound.play()

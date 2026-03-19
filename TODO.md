@@ -35,6 +35,6 @@
 ## 🥶 IMPORTANT IMPLEMENTATION
 - [x] Enemy damage
 - [x] More enemies
-- [ ] After 5 waves special enemy
+- [x] After 4 waves special enemy
 - [x] Card implementation
 - [x] Add projectile system (fireball)
