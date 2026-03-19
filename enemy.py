@@ -74,6 +74,9 @@ class Enemy:
     def play_attack_sound(self):
         pass
 
+    def play_death_sound(self):
+        pass
+
     def update_animation(self, dt):
         frames = self.get_frames()
         if not frames:
@@ -168,6 +171,7 @@ class Enemy:
             self.alive = False
             self.state = "die"
             self.anim_index = 0.0
+            self.play_death_sound()
             return
 
         self.state = "hurt"
@@ -331,8 +335,33 @@ class Skeleton(Enemy):
                 "die": self._load_sheet("Skeleton_01_White_Die.png"),
             }
 
+            try:
+                snd_dir = os.path.join("assets", "textures", "sounds", "enemy_sounds")
+                att_path = os.path.join(snd_dir, "slime_and_skelet_attack.wav")
+                if os.path.exists(att_path):
+                    Skeleton._attack_sound = pygame.mixer.Sound(att_path)
+                    Skeleton._attack_sound.set_volume(0.5)
+
+                die_path = os.path.join(snd_dir, "bones_snap.mp3")
+                if os.path.exists(die_path):
+                    Skeleton._death_sound = pygame.mixer.Sound(die_path)
+                    Skeleton._death_sound.set_volume(0.6)
+            except:
+                pass
+
         self.animations = Skeleton._animations_cache
         self.current_sprite = self.animations[self.state][0]
+
+    _attack_sound = None
+    _death_sound = None
+
+    def play_attack_sound(self):
+        if Skeleton._attack_sound:
+            Skeleton._attack_sound.play()
+
+    def play_death_sound(self):
+        if Skeleton._death_sound:
+            Skeleton._death_sound.play()
 
     def _load_sheet(self, filename):
         path = os.path.join(
@@ -477,8 +506,33 @@ class Slime(Enemy):
                 "die": self._load_individual("die", 4),
             }
 
+            try:
+                snd_dir = os.path.join("assets", "textures", "sounds", "enemy_sounds")
+                att_path = os.path.join(snd_dir, "slime_and_skelet_attack.wav")
+                if os.path.exists(att_path):
+                    Slime._attack_sound = pygame.mixer.Sound(att_path)
+                    Slime._attack_sound.set_volume(0.4)
+
+                die_path = os.path.join(snd_dir, "slime_splat.mp3")
+                if os.path.exists(die_path):
+                    Slime._death_sound = pygame.mixer.Sound(die_path)
+                    Slime._death_sound.set_volume(0.6)
+            except:
+                pass
+
         self.animations = Slime._animations_cache
         self.current_sprite = self.animations[self.state][0]
+
+    _attack_sound = None
+    _death_sound = None
+
+    def play_attack_sound(self):
+        if Slime._attack_sound:
+            Slime._attack_sound.play()
+
+    def play_death_sound(self):
+        if Slime._death_sound:
+            Slime._death_sound.play()
 
     def _load_individual(self, prefix, count):
         frames = []

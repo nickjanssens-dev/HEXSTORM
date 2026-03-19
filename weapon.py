@@ -56,6 +56,21 @@ class Weapon:
         self.range = 800
         self.enemy_hit_radius = 25
 
+        # Sound
+        self.fire_sound = None
+        if not pygame.mixer.get_init():
+            pygame.mixer.init()
+
+        try:
+            sound_path = os.path.join("assets", "textures", "sounds", "weapon.wav")
+            if os.path.exists(sound_path):
+                self.fire_sound = pygame.mixer.Sound(sound_path)
+                self.fire_sound.set_volume(0.4)
+            else:
+                print(f"DEBUG: Weapon sound file NOT FOUND at {sound_path}")
+        except Exception as e:
+            print(f"DEBUG: Weapon sound loading failed: {e}")
+
     def update(self, dt, player, enemies):
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pressed()
@@ -66,6 +81,9 @@ class Weapon:
             self.last_shot_time = current_time
             self.frame_index = 1
             self.animation_timer = 0
+
+            if self.fire_sound:
+                self.fire_sound.play()
 
             self.hit_position = self.shoot(player, enemies)
 

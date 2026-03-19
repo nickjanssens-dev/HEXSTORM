@@ -10,7 +10,7 @@
 
 ## 🔫 Combat
 - [x] Add shooting (laser / hitscan)
-- [ ] Add projectile system (fireball)
+- [x] Add projectile system (fireball)
 
 ## 👾 Enemies
 - [x] Add enemy sprite
@@ -25,20 +25,19 @@
 ## 🎮 UI / Polish
 - [x] HUD (health, weapon)
 - [ ] Sound effects
-- [ ] Song
+- [x] Song
 - [x] Game over screen
 
 ## 🚀 Nice to Have
-- [ ] Multiple weapons
+- [x] Multiple weapons
 - [x] Wave system
-- [ ] If score system, add random enemies
 
 ## 🥶 IMPORTANT IMPLEMENTATION
 - [x] Enemy damage
 - [ ] More enemies
 - [ ] After 5 waves special enemy
 - [ ] Card implementation
-- [ ] Add projectile system (fireball)
+- [x] Add projectile system (fireball)
 
 - [ ] Due Friday - Finish project
 
