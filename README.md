@@ -24,7 +24,42 @@ Players take control of a battle mage and fight enemies using a combination of m
 
 ---
 
-## 🎯 Controls
+## 🚀 Getting Started
+
+### Quick Start (Recommended)
+
+Just run the game directly - it will automatically install any missing dependencies:
+
+```bash
+python main.py
+```
+
+The game will:
+- Check for required dependencies (pygame)
+- Automatically install anything missing
+- Start the game once dependencies are ready
+
+### Manual Setup (Optional)
+
+If you prefer to install dependencies manually:
+
+```bash
+# Install pygame
+pip install pygame
+
+# Or install all requirements
+pip install -r requirements.txt
+```
+
+### Running the Game
+
+```bash
+python main.py
+```
+
+---
+
+## 🕹️ Controls
 
 - ⬆️ / ⬇️ → Move forward / backward  
 - ⬅️ / ➡️ → Strafe left / right  
