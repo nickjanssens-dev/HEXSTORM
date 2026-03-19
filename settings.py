@@ -30,7 +30,7 @@ def update_resolution(new_width, new_height):
 PLAYER_POS_X = 96
 PLAYER_POS_Y = 96
 PLAYER_ANGLE = 0
-PLAYER_SPEED = 3
+PLAYER_SPEED = 5
 PLAYER_ROT_SPEED = 0.04
 
 # Colors
