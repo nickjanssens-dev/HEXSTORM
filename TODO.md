@@ -18,13 +18,13 @@
 - [x] Health system
 
 ## 🧠 Card Input
-- [ ] Setup webcam 
-- [ ] Detect card
-- [ ] Map card to spell
+- [x] Setup webcam 
+- [x] Detect card
+- [x] Map card to spell
 
 ## 🎮 UI / Polish
 - [x] HUD (health, weapon)
-- [ ] Sound effects
+- [x] Sound effects
 - [x] Song
 - [x] Game over screen
 
@@ -34,12 +34,7 @@
 
 ## 🥶 IMPORTANT IMPLEMENTATION
 - [x] Enemy damage
-- [ ] More enemies
+- [x] More enemies
 - [ ] After 5 waves special enemy
-- [ ] Card implementation
+- [x] Card implementation
 - [x] Add projectile system (fireball)
-
-- [ ] Due Friday - Finish project
-
-Extra:
-- [ ] Ammo, reload 
