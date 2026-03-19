@@ -1,0 +1,6 @@
+0 Ice shards
+1 Inferno burst
+2 Void bulwark
+3 Arcane bulwark
+4 Healing touch
+5 No card

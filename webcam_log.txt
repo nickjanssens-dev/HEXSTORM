@@ -1,0 +1,293 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773943570.034962   33656 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773943571.904989   33656 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING:tensorflow:From C:\Users\Rawap\OneDrive\Bureaublad\HEXSTORM\.venv311\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+I0000 00:00:1773943572.796795   33656 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX_VNNI AVX_VNNI_INT8 AVX_NE_CONVERT FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING:tensorflow:From C:\Users\Rawap\OneDrive\Bureaublad\HEXSTORM\.venv311\Lib\site-packages\tf_keras\src\backend.py:1400: The name tf.executing_eagerly_outside_functions is deprecated. Please use tf.compat.v1.executing_eagerly_outside_functions instead.
+
+WARNING:tensorflow:From C:\Users\Rawap\OneDrive\Bureaublad\HEXSTORM\.venv311\Lib\site-packages\tf_keras\src\layers\normalization\batch_normalization.py:979: The name tf.nn.fused_batch_norm is deprecated. Please use tf.compat.v1.nn.fused_batch_norm instead.
+
+[ WARN:0@1.268] global cap.cpp:480 cv::VideoCapture::open VIDEOIO(DSHOW): backend is generally available but can't be used to capture by index
+Webcam initialized. Press 'esc' to exit.
+Detected No card... Hold for 2.0s
+
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+
++++ GAME_RESULT: No card +++
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+Detected No card... Hold for 2.0s
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+
++++ GAME_RESULT: No card +++
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+Detected No card... Hold for 2.0s
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+
++++ GAME_RESULT: No card +++
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+Detected No card... Hold for 2.0s
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+
++++ GAME_RESULT: No card +++
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+Detected No card... Hold for 2.0s
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+
++++ GAME_RESULT: No card +++
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+Detected No card... Hold for 2.0s
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+
+AI DETECTION: No card (0.98)
+Confidence dropped (0.79). Resetting timer.
+AI DETECTION: Ice shards (0.79)
+AI DETECTION: Ice shards (0.55)
+AI DETECTION: Ice shards (0.72)
+Detected Ice shards... Hold for 2.0s
+AI DETECTION: Ice shards (0.98)
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (1.00)
+AI DETECTION: Ice shards (0.98)
+AI DETECTION: Ice shards (1.00)
+AI DETECTION: Ice shards (0.98)
+AI DETECTION: Ice shards (0.96)
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (1.00)
+AI DETECTION: Ice shards (1.00)
+AI DETECTION: Ice shards (1.00)
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (0.88)
+AI DETECTION: Ice shards (0.90)
+AI DETECTION: Ice shards (0.98)
+
+Confidence dropped (0.83). Resetting timer.
+AI DETECTION: Ice shards (0.83)
+AI DETECTION: Ice shards (0.65)
+AI DETECTION: Ice shards (0.77)
+Detected Ice shards... Hold for 2.0s
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (0.93)
+AI DETECTION: Ice shards (0.85)
+AI DETECTION: Ice shards (0.98)
+AI DETECTION: Ice shards (1.00)
+AI DETECTION: Ice shards (1.00)
+AI DETECTION: Ice shards (1.00)
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (0.94)
+AI DETECTION: Ice shards (0.96)
+
+Confidence dropped (0.80). Resetting timer.
+AI DETECTION: Ice shards (0.80)
+Detected Ice shards... Hold for 2.0s
+AI DETECTION: Ice shards (0.92)
+AI DETECTION: Ice shards (0.92)
+
+Confidence dropped (0.75). Resetting timer.
+AI DETECTION: Ice shards (0.75)
+AI DETECTION: Ice shards (0.45)
+AI DETECTION: No card (0.59)
+AI DETECTION: No card (0.73)
+AI DETECTION: No card (0.56)
+AI DETECTION: No card (0.51)
+Detected No card... Hold for 2.0s
+
+Confidence dropped (0.79). Resetting timer.
+AI DETECTION: No card (0.93)
+AI DETECTION: No card (0.79)
+AI DETECTION: No card (0.69)
+AI DETECTION: No card (0.72)
+Detected No card... Hold for 2.0s
+AI DETECTION: No card (0.88)
+AI DETECTION: No card (0.97)
+AI DETECTION: No card (0.97)
+
+AI DETECTION: No card (0.99)
+Confidence dropped (0.68). Resetting timer.
+AI DETECTION: Ice shards (0.68)
+AI DETECTION: Ice shards (0.56)
+Detected Ice shards... Hold for 2.0s
+AI DETECTION: Ice shards (0.96)
+
+Confidence dropped (0.82). Resetting timer.
+AI DETECTION: Ice shards (0.82)
+Detected Ice shards... Hold for 2.0s
+AI DETECTION: Ice shards (0.92)
+AI DETECTION: Ice shards (0.85)
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (0.98)
+AI DETECTION: Ice shards (0.95)
+AI DETECTION: Ice shards (1.00)
+AI DETECTION: Ice shards (1.00)
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (0.98)
+AI DETECTION: Ice shards (0.97)
+
+Confidence dropped (0.57). Resetting timer.
+AI DETECTION: No card (0.57)
+Detected No card... Hold for 2.0s
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (0.99)
+
+Confidence dropped (0.51). Resetting timer.
+AI DETECTION: Healing touch (0.51)
+AI DETECTION: Healing touch (0.78)
+Detected No card... Hold for 2.0s
+AI DETECTION: No card (0.97)
+AI DETECTION: No card (0.90)
+AI DETECTION: No card (0.98)
+AI DETECTION: No card (1.00)
+
+Confidence dropped (0.68). Resetting timer.
+AI DETECTION: Ice shards (0.68)
+Detected Ice shards... Hold for 2.0s
+AI DETECTION: Ice shards (0.96)
+AI DETECTION: Ice shards (0.95)
+AI DETECTION: Ice shards (0.87)
+AI DETECTION: Ice shards (0.96)
+AI DETECTION: Ice shards (0.98)
+AI DETECTION: Ice shards (0.98)
+AI DETECTION: Ice shards (0.97)
+AI DETECTION: Ice shards (0.98)
+AI DETECTION: Ice shards (0.98)
+AI DETECTION: Ice shards (0.98)
+AI DETECTION: Ice shards (0.98)
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (0.99)
+
++++ GAME_RESULT: Ice shards +++
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (0.99)
+AI DETECTION: Ice shards (0.86)
+AI DETECTION: Ice shards (0.52)
+AI DETECTION: No card (0.71)
+AI DETECTION: No card (0.99)
+AI DETECTION: No card (0.99)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+Detected No card... Hold for 2.0s
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (0.99)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
+AI DETECTION: No card (1.00)
