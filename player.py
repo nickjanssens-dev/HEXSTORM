@@ -12,6 +12,7 @@ class Player:
         self.rot_speed = rot_speed
 
         self.health = health
+        self.max_health = health  # Store max health for healing
         self.max_mana = max_mana
         self.mana = self.max_mana
         self.regen_rate = mana_regen_rate # mana per second
@@ -19,7 +20,7 @@ class Player:
 
         self.is_moving = False
         self.shooting = False
-
+        
         # NEW
         self.alive = True
         self.shield = 0
@@ -41,23 +42,28 @@ class Player:
         dx = 0
         dy = 0
 
-        if keys[pygame.K_UP]:
+        # Import CONTROLS from main
+        import main
+        controls = main.CONTROLS
+
+        # Movement using CONTROLS dictionary
+        if keys[controls["move_forward"]]:
             dx += cos_a * self.speed
             dy += sin_a * self.speed
-        if keys[pygame.K_DOWN]:
+        if keys[controls["move_backward"]]:
             dx -= cos_a * self.speed
             dy -= sin_a * self.speed
-
-        if keys[pygame.K_LEFT]:
+        if keys[controls["move_left"]]:
             dx += sin_a * self.speed
             dy -= cos_a * self.speed
-        if keys[pygame.K_RIGHT]:
+        if keys[controls["move_right"]]:
             dx -= sin_a * self.speed
             dy += cos_a * self.speed
 
-        if keys[pygame.K_s]:
+        # Turning using CONTROLS dictionary
+        if keys[controls["turn_left"]]:
             self.angle -= self.rot_speed
-        if keys[pygame.K_d]:
+        if keys[controls["turn_right"]]:
             self.angle += self.rot_speed
 
         self.angle %= math.tau

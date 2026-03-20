@@ -80,6 +80,19 @@ DIFFICULTY_EASY = "easy"
 DIFFICULTY_MEDIUM = "medium"
 DIFFICULTY_HARD = "hard"
 
+# Control bindings (default values)
+CONTROLS = {
+    "move_forward": pygame.K_UP,
+    "move_backward": pygame.K_DOWN,
+    "move_left": pygame.K_LEFT,
+    "move_right": pygame.K_RIGHT,
+    "turn_left": pygame.K_s,
+    "turn_right": pygame.K_d,
+    "shoot": pygame.K_SPACE,
+    "spell1": pygame.K_1,
+    "spell2": pygame.K_2
+}
+
 # Difficulty parameters
 DIFFICULTY_SETTINGS = {
     DIFFICULTY_EASY: {
@@ -249,6 +262,74 @@ def draw_game_over(screen):
 
     screen.blit(game_over_text, game_over_rect)
     screen.blit(restart_text, restart_rect)
+
+def draw_controls_rebinding(screen, background, selected_control_index=0, rebinding_active=False, rebinding_control=None):
+    screen.blit(background, (0, 0))
+    
+    title_font = pygame.font.SysFont("Times New Roman", 64, bold=True)
+    option_font = pygame.font.SysFont("Arial", 32, bold=True)
+    small_font = pygame.font.SysFont("Arial", 24)
+    
+    # Dark overlay
+    overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 70))
+    screen.blit(overlay, (0, 0))
+    
+    # Title
+    title_text = title_font.render("REBIND CONTROLS", True, (255, 230, 180))
+    title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
+    screen.blit(title_text, title_rect)
+    
+    # Control list
+    controls_list = [
+        ("Move Forward", "move_forward"),
+        ("Move Backward", "move_backward"),
+        ("Move Left", "move_left"),
+        ("Move Right", "move_right"),
+        ("Turn Left", "turn_left"),
+        ("Turn Right", "turn_right"),
+        ("Shoot Gun", "shoot"),
+        ("Spell 1", "spell1"),
+        ("Spell 2", "spell2")
+    ]
+    
+    start_y = 200
+    spacing = 50
+    
+    if rebinding_active:
+        # Show rebinding prompt
+        prompt_text = option_font.render(f"Press new key for {rebinding_control[0]}", True, (255, 255, 100))
+        prompt_rect = prompt_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        screen.blit(prompt_text, prompt_rect)
+        
+        hint_text = small_font.render("Press ESC to cancel", True, (200, 200, 200))
+        hint_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+        screen.blit(hint_text, hint_rect)
+    else:
+        # Show current controls
+        for i, (display_name, control_key) in enumerate(controls_list):
+            if i == selected_control_index:
+                color = (255, 210, 100)
+                # Draw selection box
+                box_rect = pygame.Rect(SCREEN_WIDTH // 2 - 250, start_y + i * spacing - 15, 500, 45)
+                pygame.draw.rect(screen, color, box_rect, 2)
+            else:
+                color = (230, 230, 230)
+            
+            # Get current key name
+            current_key = pygame.key.name(CONTROLS[control_key])
+            if current_key:
+                current_key = current_key.upper()
+            
+            # Display control
+            control_text = option_font.render(f"{display_name}: {current_key}", True, color)
+            control_rect = control_text.get_rect(center=(SCREEN_WIDTH // 2, start_y + i * spacing))
+            screen.blit(control_text, control_rect)
+        
+        # Instructions
+        hint_text = small_font.render("Use UP/DOWN to select, ENTER to rebind, ESC to go back", True, (220, 220, 220))
+        hint_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 60))
+        screen.blit(hint_text, hint_rect)
 
 def draw_menu(screen, background, selected_option, menu_options, menu_level="main", selected_difficulty_option=1):
     screen.blit(background, (0, 0))
@@ -433,10 +514,13 @@ def main():
     player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode, difficulty = reset_game()
 
     game_state = STATE_MENU
-    # Create two-level menu system
-    menu_level = "main"  # "main" or "difficulty"
+    # Create menu system with rebinding
+    menu_level = "main"  # "main", "difficulty", or "rebinding"
     selected_main_option = 0
     selected_difficulty_option = 1  # Default to medium
+    selected_control_index = 0  # For rebinding screen
+    rebinding_active = False
+    rebinding_control = None
     main_options = ["PLAY", "HARDCORE", "QUIT"]
     difficulty_options = ["EASY", "MEDIUM", "HARD"]
     selected_option = 0
@@ -550,99 +634,84 @@ def main():
                             selected_option = selected_main_option
 
                 elif game_state == STATE_PLAYING:
-                    if event.key == pygame.K_1:
-                        staff.current_spell = "Inferno burst"
-
-                    elif event.key == pygame.K_2:
-                        staff.current_spell = "Ice shards"
-
-                    elif event.key == pygame.K_f:
-                        staff.cast(player)
-
-                elif game_state == STATE_GAME_OVER:
-                    if event.key == pygame.K_r:
-                        player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode, difficulty = reset_game(game_mode, difficulty)
-                        game_state = STATE_PLAYING
-
-        # Check for spells from the webcam
-        if game_state == STATE_PLAYING:
-            try:
-                # Poll queue for NEW spell detections
-                while not webcam_queue.empty():
-                    spell_detected = webcam_queue.get_nowait()
-                    print(f"DEBUG: Webcam triggered: {spell_detected}")
-                    
-                    if spell_detected == "Ice shards":
-                        staff.current_spell = "Ice shards"
-                        # Deduct mana cost
-                        mana_cost = staff.get_mana_cost()
-                        if player.mana >= mana_cost:
-                            player.mana -= mana_cost
-                            forward_distance = 60 
-                            right_offset = 8
-                            spawn_x = (
-                                player.x
-                                + math.cos(player.angle) * forward_distance
-                                + math.cos(player.angle + math.pi / 2) * right_offset
-                            )
-                            spawn_y = (
-                                player.y
-                                + math.sin(player.angle) * forward_distance
-                                + math.sin(player.angle + math.pi / 2) * right_offset
-                            )
-                            staff.spawn_data = (spawn_x, spawn_y, player.angle)
-                            projectile = staff._spawn_projectile(player)
-                            if projectile:
-                                projectiles.append(projectile)
-                    elif spell_detected == "Inferno burst":
-                        staff.current_spell = "Inferno burst"
-                        # Deduct mana cost
-                        mana_cost = staff.get_mana_cost()
-                        if player.mana >= mana_cost:
-                            player.mana -= mana_cost
-                            forward_distance = 60 
-                            right_offset = 8
-                            spawn_x = (
-                                player.x
-                                + math.cos(player.angle) * forward_distance
-                                + math.cos(player.angle + math.pi / 2) * right_offset
-                            )
-                            spawn_y = (
-                                player.y
-                                + math.sin(player.angle) * forward_distance
-                                + math.sin(player.angle + math.pi / 2) * right_offset
-                            )
-                            staff.spawn_data = (spawn_x, spawn_y, player.angle)
-                            projectile = staff._spawn_projectile(player)
-                            if projectile:
-                                projectiles.append(projectile)
-                    elif spell_detected == "Healing touch":
-                        staff.current_spell = "Healing touch"
-                        mana_cost = staff.get_mana_cost()
-                        if player.mana >= mana_cost:
-                            player.mana -= mana_cost
-                            player.health = 100  # Full health
-                            player.heal_time = get_time()  # Track healing time for green flash
-                            print(f"Healing touch: Restored to full health!")
-                    elif spell_detected == "Void bulwark":
-                        staff.current_spell = "Void bulwark"
-                        mana_cost = staff.get_mana_cost()
-                        if player.mana >= mana_cost:
-                            player.mana -= mana_cost
-                            player.damage_reduction = 1.0  # 100% immunity
-                            player.damage_reduction_end_time = get_time() + 7.5  # 7.5 seconds
-                            print(f"Void bulwark: Immune to damage for 7.5 seconds")
-                    elif spell_detected == "Arcane bulwark":
-                        staff.current_spell = "Arcane bulwark"
-                        mana_cost = staff.get_mana_cost()
-                        if player.mana >= mana_cost:
-                            player.mana -= mana_cost
-                            player.damage_reduction = 0.5  # 50% damage reduction
-                            player.damage_reduction_end_time = get_time() + 5.0  # 5 seconds
-                            print(f"Arcane bulwark: 50% damage reduction for 5 seconds")
-                    # Add more mappings here for other labels if needed
-            except queue.Empty:
-                pass
+                    try:
+                        # Poll queue for NEW spell detections
+                        while not webcam_queue.empty():
+                            spell_detected = webcam_queue.get_nowait()
+                            print(f"DEBUG: Webcam triggered: {spell_detected}")
+                            
+                            if spell_detected == "Ice shards":
+                                staff.current_spell = "Ice shards"
+                                # Deduct mana cost
+                                mana_cost = staff.get_mana_cost()
+                                if player.mana >= mana_cost:
+                                    player.mana -= mana_cost
+                                    forward_distance = 60 
+                                    right_offset = 8
+                                    spawn_x = (
+                                        player.x
+                                        + math.cos(player.angle) * forward_distance
+                                        + math.cos(player.angle + math.pi / 2) * right_offset
+                                    )
+                                    spawn_y = (
+                                        player.y
+                                        + math.sin(player.angle) * forward_distance
+                                        + math.sin(player.angle + math.pi / 2) * right_offset
+                                    )
+                                    staff.spawn_data = (spawn_x, spawn_y, player.angle)
+                                    projectile = staff._spawn_projectile(player)
+                                    if projectile:
+                                        projectiles.append(projectile)
+                            elif spell_detected == "Inferno burst":
+                                staff.current_spell = "Inferno burst"
+                                # Deduct mana cost
+                                mana_cost = staff.get_mana_cost()
+                                if player.mana >= mana_cost:
+                                    player.mana -= mana_cost
+                                    forward_distance = 60 
+                                    right_offset = 8
+                                    spawn_x = (
+                                        player.x
+                                        + math.cos(player.angle) * forward_distance
+                                        + math.cos(player.angle + math.pi / 2) * right_offset
+                                    )
+                                    spawn_y = (
+                                        player.y
+                                        + math.sin(player.angle) * forward_distance
+                                        + math.sin(player.angle + math.pi / 2) * right_offset
+                                    )
+                                    staff.spawn_data = (spawn_x, spawn_y, player.angle)
+                                    projectile = staff._spawn_projectile(player)
+                                    if projectile:
+                                        projectiles.append(projectile)
+                            elif spell_detected == "Healing touch":
+                                staff.current_spell = "Healing touch"
+                                mana_cost = staff.get_mana_cost()
+                                if player.mana >= mana_cost:
+                                    player.mana -= mana_cost
+                                    # Set health to max health based on difficulty
+                                    player.health = player.max_health if hasattr(player, 'max_health') else DIFFICULTY_SETTINGS[difficulty]["health"]
+                                    player.heal_time = get_time()  # Track healing time for green flash
+                                    print(f"Healing touch: Restored to full health!")
+                            elif spell_detected == "Void bulwark":
+                                staff.current_spell = "Void bulwark"
+                                mana_cost = staff.get_mana_cost()
+                                if player.mana >= mana_cost:
+                                    player.mana -= mana_cost
+                                    player.damage_reduction = 1.0  # 100% immunity
+                                    player.damage_reduction_end_time = get_time() + 7.5  # 7.5 seconds
+                                    print(f"Void bulwark: Immune to damage for 7.5 seconds")
+                            elif spell_detected == "Arcane bulwark":
+                                staff.current_spell = "Arcane bulwark"
+                                mana_cost = staff.get_mana_cost()
+                                if player.mana >= mana_cost:
+                                    player.mana -= mana_cost
+                                    player.damage_reduction = 0.5  # 50% damage reduction
+                                    player.damage_reduction_end_time = get_time() + 5.0  # 5 seconds
+                                    print(f"Arcane bulwark: 50% damage reduction for 5 seconds")
+                            # Add more mappings here for other labels if needed
+                    except queue.Empty:
+                        pass
 
         if game_state == STATE_PLAYING:
             for explosion in explosions:
