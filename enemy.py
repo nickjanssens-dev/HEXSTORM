@@ -702,7 +702,7 @@ class Necromancer(Enemy):
         # --- Collision / visuals (scaled accordingly) ---
         self.hit_radius = int(35 * self.scale)
         self.world_height = 150 # int(25 * self.scale)
-        self.y_offset = int(12 * self.scale)
+        self.y_offset = int(0 * self.scale)
 
         # --- Animation ---
         self.anim_speed = 0.015

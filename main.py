@@ -146,7 +146,15 @@ def create_enemies(player=None, amount=8, used_tiles=None, wave=1):
         used_tiles = set()
 
     enemies = []
+    
+    # After wave 4, we want exactly 2 Necromancers
+    num_necromancers = 0
+    if wave > 4:
+        num_necromancers = 2
+        # Reduce the regular enemy count to accommodate the 2 Necromancers
+        amount = max(0, amount - 2)
 
+    # Spawn regular enemies
     for _ in range(amount):
         while True:
             sx = random.randint(1, len(game_map[0]) - 2)
@@ -164,14 +172,30 @@ def create_enemies(player=None, amount=8, used_tiles=None, wave=1):
                         continue
 
                 used_tiles.add((sx, sy))
-                if wave == 5:
-                    enemy_types = [Necromancer]
-                else:
-                    enemy_types = [Bat, Skeleton, Slime, Wolf]
-                    if wave > 4:
-                        enemy_types.append(Necromancer)
-                
+                enemy_types = [Bat, Skeleton, Slime, Wolf]
                 enemies.append(random.choice(enemy_types)(enemy_x, enemy_y))
+                break
+
+    # Specifically spawn Necromancers if needed
+    for _ in range(num_necromancers):
+        while True:
+            sx = random.randint(1, len(game_map[0]) - 2)
+            sy = random.randint(1, len(game_map) - 2)
+
+            if game_map[sy][sx] == 0 and (sx, sy) not in used_tiles:
+                enemy_x = sx * TILE_SIZE + TILE_SIZE // 2
+                enemy_y = sy * TILE_SIZE + TILE_SIZE // 2
+
+                if player:
+                    dx = enemy_x - player.x
+                    dy = enemy_y - player.y
+                    dist = math.hypot(dx, dy)
+                    # Necromancers spawn further away (min 400 pixels)
+                    if dist < 400 or dist > 1200:
+                        continue
+
+                used_tiles.add((sx, sy))
+                enemies.append(Necromancer(enemy_x, enemy_y))
                 break
 
     return enemies
@@ -246,9 +270,7 @@ def reset_game():
     used_tiles = set()
     sprites = create_decor_sprites(30, used_tiles=used_tiles)
     wave = 1
-    # Force 2 enemies if starting at wave 5 for the boss fight
-    enemy_count = 2 if wave == 5 else 8
-    enemies = create_enemies(player, enemy_count, used_tiles=used_tiles, wave=wave)
+    enemies = create_enemies(player, 8, used_tiles=used_tiles, wave=wave)
     explosions = []
 
     weapon = Weapon()
