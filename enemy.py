@@ -3,6 +3,7 @@ import math
 import os
 import settings
 from map import is_wall
+from pathfinding import get_next_waypoint, can_reach_directly
 
 def check_line_of_sight(x1, y1, x2, y2):
     dx = x2 - x1
@@ -49,6 +50,12 @@ class Enemy:
         self.anim_index = 0.0
         self.anim_speed = 0.012
         self.current_sprite = None
+        
+        # Pathfinding attributes
+        self.pathfinding_timer = 0
+        self.pathfinding_interval = 500  # ms - recalculate path every 500ms
+        self.current_waypoint = None
+        self.use_pathfinding = False
 
     def _slice_sheet(self, sheet, frame_width=None):
         if frame_width is None:
@@ -138,6 +145,9 @@ class Enemy:
             if self.slow_timer <= 0:
                 self.slow_factor = 1.0
 
+        # Update pathfinding timer
+        self.pathfinding_timer += dt
+
         if self.alive and self.state != "hurt":
             if self.state == "attack" and self.attack_timer <= 0:
                 player.take_damage(self.damage)
@@ -148,15 +158,48 @@ class Enemy:
             dy = player.y - self.y
             distance = math.hypot(dx, dy)
 
-            if distance > 10:
+            if distance > 0.5:  # Move towards player if not in attack range
                 current_speed = self.speed * self.slow_factor
-                new_x = self.x + (dx / distance) * current_speed * dt
-                new_y = self.y + (dy / distance) * current_speed * dt
+                
+                # Determine if we should use pathfinding
+                has_los = check_line_of_sight(self.x, self.y, player.x, player.y)
+                
+                if has_los and distance < 10:
+                    # Direct movement when we have line of sight
+                    self.use_pathfinding = False
+                    new_x = self.x + (dx / distance) * current_speed * dt
+                    new_y = self.y + (dy / distance) * current_speed * dt
+                else:
+                    # Use pathfinding when no line of sight or far away
+                    self.use_pathfinding = True
+                    
+                    # Recalculate path periodically
+                    if self.pathfinding_timer >= self.pathfinding_interval:
+                        self.pathfinding_timer = 0
+                        waypoint = get_next_waypoint(self.x, self.y, player.x, player.y)
+                        if waypoint:
+                            self.current_waypoint = waypoint
+                    
+                    # Move towards current waypoint
+                    if self.current_waypoint:
+                        wp_dx = self.current_waypoint[0] - self.x
+                        wp_dy = self.current_waypoint[1] - self.y
+                        wp_distance = math.hypot(wp_dx, wp_dy)
+                        
+                        if wp_distance > 1:  # If not at waypoint
+                            new_x = self.x + (wp_dx / wp_distance) * current_speed * dt
+                            new_y = self.y + (wp_dy / wp_distance) * current_speed * dt
+                        else:
+                            # Reached waypoint, clear it to get new one
+                            self.current_waypoint = None
+                            return  # Skip movement this frame
 
-                if not is_wall(new_x, self.y):
-                    self.x = new_x
-                if not is_wall(self.x, new_y):
-                    self.y = new_y
+                # Apply movement with collision checking
+                if 'new_x' in locals() and 'new_y' in locals():
+                    if not is_wall(new_x, self.y):
+                        self.x = new_x
+                    if not is_wall(self.x, new_y):
+                        self.y = new_y
 
         self.update_animation(dt)
 
