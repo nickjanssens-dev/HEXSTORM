@@ -24,8 +24,8 @@ class IceShard:
 
         self.damage = 15
         self.hit_radius = 20
-        self.slow_factor = 0.5
-        self.slow_duration = 2000 # ms
+        self.slow_factor = 0.3  # Increased slow effect (enemies move at 30% speed)
+        self.slow_duration = 4000  # Extended duration from 2000ms to 4000ms
 
     def update(self, dt):
         dt_seconds = dt / 1000.0

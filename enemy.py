@@ -291,6 +291,14 @@ class Enemy:
                             column_scaled = pygame.transform.scale(
                                 column, (1, int(sprite_height))
                             )
+                            
+                            # Apply blue tint if enemy is slowed
+                            if self.slow_timer > 0 and self.slow_factor < 1.0:
+                                # Create blue tint overlay
+                                blue_surface = pygame.Surface((1, int(sprite_height)), pygame.SRCALPHA)
+                                blue_surface.fill((100, 150, 255, 80))  # Light blue with transparency
+                                column_scaled.blit(blue_surface, (0, 0), special_flags=pygame.BLEND_ADD)
+                            
                             screen.blit(column_scaled, (pixel_x, screen_y))
 
 

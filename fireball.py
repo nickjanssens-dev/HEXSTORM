@@ -23,7 +23,7 @@ class Fireball:
         self.alive = True
 
         # Combat
-        self.damage = 25
+        self.damage = 75  # Increased from 25 for much higher damage
         self.hit_radius = 60
         self.aoe_radius = 120
 
