@@ -28,7 +28,6 @@ def check_line_of_sight(x1, y1, x2, y2):
 
     return True
 
-
 class Enemy:
     def __init__(self, x, y):
         self.x = x
@@ -301,7 +300,6 @@ class Enemy:
                             
                             screen.blit(column_scaled, (pixel_x, screen_y))
 
-
 class Bat(Enemy):
     _animations_cache = {}
     _attack_sound = None
@@ -358,7 +356,6 @@ class Bat(Enemy):
 
     def play_attack_sound(self):
         if Bat._attack_sound: Bat._attack_sound.play()
-
 
 class Skeleton(Enemy):
     _animations_cache = {}
@@ -462,8 +459,6 @@ class Skeleton(Enemy):
 
         return frames if frames else [sheet]
 
-
-
     def _normalize_frames(self, frames):
         """
         Stabilized version:
@@ -491,7 +486,7 @@ class Skeleton(Enemy):
         for i, frame in enumerate(trimmed_frames):
             surface = pygame.Surface((max_w, max_h), pygame.SRCALPHA)
 
-            # 🔥 MUCH smoother offsets (less aggressive)
+            # MUCH smoother offsets (less aggressive)
             offset_x = 0
             offset_y = 0
 
@@ -504,7 +499,7 @@ class Skeleton(Enemy):
             elif i in [4]:
                 offset_x = +1
 
-            # 🔥 tiny vertical correction (prevents foot jitter)
+            # tiny vertical correction (prevents foot jitter)
             if i in [2, 3]:
                 offset_y = 1
 
@@ -534,7 +529,6 @@ class Skeleton(Enemy):
 
         self.current_sprite = frames[int(self.anim_index)]
 
-
 class Slime(Enemy):
     _animations_cache = {}
 
@@ -549,7 +543,7 @@ class Slime(Enemy):
         # Slower animation feels more "squishy"
         self.anim_speed = 0.006
 
-        # 🔥 IMPORTANT: push slime down so it touches ground
+        # IMPORTANT: push slime down so it touches ground
         self.y_offset = 24   # lowered further to make it touch the ground
 
         if not Slime._animations_cache:
@@ -616,7 +610,6 @@ class Slime(Enemy):
 
     def get_frames(self):
         return self.animations.get(self.state, self.animations["idle"])
-
 
 class Wolf(Enemy):
     _animations_cache = {}
@@ -690,7 +683,6 @@ class Wolf(Enemy):
     def get_frames(self):
         return self.animations.get(self.state, self.animations["idle"])
 
-
 class Necromancer(Enemy):
     _animations_cache = {}
     _attack_sound = None
@@ -699,20 +691,20 @@ class Necromancer(Enemy):
     def __init__(self, x, y):
         super().__init__(x, y)
 
-        # --- Boss stats ---
+        # Boss stats
         self.speed = 0.02
         self.health = 2000
         self.damage = 25
 
-        # --- Scaling ---
+        # Scaling
         self.scale = 2.0
 
-        # --- Collision / visuals (scaled accordingly) ---
+        # Collision / visuals (scaled accordingly)
         self.hit_radius = int(35 * self.scale)
         self.world_height = 150 # int(25 * self.scale)
         self.y_offset = int(0 * self.scale)
 
-        # --- Animation ---
+        # Animation
         self.anim_speed = 0.015
 
         if not Necromancer._animations_cache:
@@ -752,7 +744,7 @@ class Necromancer(Enemy):
             rect = (i * frame_w, row_idx * frame_h, frame_w, frame_h)
             frame = sheet.subsurface(rect).copy()
 
-            # 🔥 Proper scalable resizing
+            # Proper scalable resizing
             scaled_w = int(frame_w * self.scale)
             scaled_h = int(frame_h * self.scale)
 

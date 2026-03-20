@@ -2,7 +2,6 @@ import os
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
 from tensorflow.keras.models import load_model
-
 import cv2  # Install opencv-python
 import numpy as np
 import time

@@ -1,7 +1,6 @@
+import pygame
 import os
 import math
-import pygame
-
 import settings
 from map import game_map
 from controls import CONTROLS

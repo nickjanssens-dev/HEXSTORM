@@ -1,7 +1,6 @@
-import math
 import pygame
+import math
 import settings
-
 
 class Sprite:
     def __init__(self, x, y, texture, scale=0.4, z_offset=0):
@@ -16,7 +15,6 @@ class Sprite:
 
         self.width = texture.get_width()
         self.height = texture.get_height()
-
 
 def render_sprites(screen, player, sprites, depth_buffer):
     visible_sprites = [
@@ -43,14 +41,14 @@ def render_sprites(screen, player, sprites, depth_buffer):
 
         if abs(alpha) < settings.HALF_FOV + 0.2:
 
-            # 🔥 screen X
+            # screen X
             screen_x = (alpha / settings.FOV + 0.5) * settings.SCREEN_WIDTH
 
-            # 🔥 perspective correction
+            # perspective correction
             corrected_dist = distance * math.cos(alpha)
             corrected_dist = max(corrected_dist, 0.1)
 
-            # 🔥 projection size
+            # projection size
             full_wall_height = int(
                 (settings.TILE_SIZE / corrected_dist) * settings.DIST_TO_PROJ_PLANE
             )
@@ -60,13 +58,13 @@ def render_sprites(screen, player, sprites, depth_buffer):
 
             half_width = sprite_width // 2
 
-            # 🔥 vertical positioning
+            # vertical positioning
             z_offset = getattr(sprite, 'z_offset', 0)
             y_offset = getattr(sprite, 'y_offset', 0)
 
             proj_z = int(z_offset / corrected_dist * settings.DIST_TO_PROJ_PLANE)
 
-            # ✅ FIXED grounding formula (matches enemies better)
+            # FIXED grounding formula (matches enemies better)
             screen_y = (
                 settings.SCREEN_HEIGHT // 2
                 + full_wall_height // 2
@@ -85,7 +83,6 @@ def render_sprites(screen, player, sprites, depth_buffer):
 
                     if 0 <= ray_idx < len(depth_buffer):
                         if corrected_dist < depth_buffer[ray_idx]:
-
                             tex_x = int(i * step)
 
                             if 0 <= tex_x < sprite.texture.get_width():

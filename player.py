@@ -21,8 +21,7 @@ class Player:
 
         self.is_moving = False
         self.shooting = False
-        
-        # NEW
+
         self.alive = True
         self.shield = 0
         

@@ -1,8 +1,7 @@
 import math
 import pygame
-
-from map import is_wall
 import settings
+from map import is_wall
 
 def ray_casting(screen, player, textures):
     start_angle = player.angle - settings.HALF_FOV

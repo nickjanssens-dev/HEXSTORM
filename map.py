@@ -1,11 +1,9 @@
 import random
 from settings import TILE_SIZE
 
-
 def generate_map(width=40, height=40, num_rooms=18):
     # Start with all walls
     new_map = [[1 for _ in range(width)] for _ in range(height)]
-
     rooms = []
 
     for _ in range(num_rooms):
@@ -17,7 +15,7 @@ def generate_map(width=40, height=40, num_rooms=18):
 
         new_room = (x, y, room_w, room_h)
 
-        # Optional overlap check so rooms don't stack too much
+        # Overlap check so rooms don't stack too much
         overlaps = False
         for other in rooms:
             ox, oy, ow, oh = other
@@ -76,20 +74,16 @@ def generate_map(width=40, height=40, num_rooms=18):
 
     return new_map
 
-
 def carve_h_corridor(new_map, x1, x2, y):
     for x in range(min(x1, x2), max(x1, x2) + 1):
         new_map[y][x] = 0
-
 
 def carve_v_corridor(new_map, y1, y2, x):
     for y in range(min(y1, y2), max(y1, y2) + 1):
         new_map[y][x] = 0
 
-
 # Bigger connected dungeon
 game_map = generate_map(width=40, height=40, num_rooms=18)
-
 
 def is_wall(x, y):
     map_x = int(x // TILE_SIZE)
@@ -98,7 +92,6 @@ def is_wall(x, y):
     if 0 <= map_y < len(game_map) and 0 <= map_x < len(game_map[0]):
         return game_map[map_y][map_x]
     return 1
-
 
 def get_free_pos():
     while True:
