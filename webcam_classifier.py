@@ -49,7 +49,7 @@ data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
 # Timing variables
 confidence_threshold = 0.85
 no_card_threshold = 0.80
-REQUIRED_HOLD_TIME = 0.2  # seconds to hold card before casting (very fast response)
+REQUIRED_HOLD_TIME = 0.3  # seconds to hold card before casting
 
 current_class = None
 last_fired_class = None
