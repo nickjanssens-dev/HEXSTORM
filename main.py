@@ -2,6 +2,7 @@ import math
 import os
 import random
 import importlib.util
+from time import time as get_time
 
 # Auto-install dependencies if not present
 def ensure_dependencies():
@@ -483,27 +484,24 @@ def main():
                         if player.mana >= mana_cost:
                             player.mana -= mana_cost
                             player.health = 100  # Full health
-                            import time
-                            player.heal_time = time.time()  # Track healing time for green flash
+                            player.heal_time = get_time()  # Track healing time for green flash
                             print(f"Healing touch: Restored to full health!")
                     elif spell_detected == "Void bulwark":
                         staff.current_spell = "Void bulwark"
                         mana_cost = staff.get_mana_cost()
                         if player.mana >= mana_cost:
                             player.mana -= mana_cost
-                            import time
                             player.damage_reduction = 1.0  # 100% immunity
-                            player.damage_reduction_end_time = time.time() + 15  # 15 seconds
-                            print(f"Void bulwark: Immune to damage for 15 seconds")
+                            player.damage_reduction_end_time = get_time() + 7.5  # 7.5 seconds
+                            print(f"Void bulwark: Immune to damage for 7.5 seconds")
                     elif spell_detected == "Arcane bulwark":
                         staff.current_spell = "Arcane bulwark"
                         mana_cost = staff.get_mana_cost()
                         if player.mana >= mana_cost:
                             player.mana -= mana_cost
-                            import time
                             player.damage_reduction = 0.5  # 50% damage reduction
-                            player.damage_reduction_end_time = time.time() + 10  # 10 seconds
-                            print(f"Arcane bulwark: 50% damage reduction for 10 seconds")
+                            player.damage_reduction_end_time = get_time() + 5.0  # 5 seconds
+                            print(f"Arcane bulwark: 50% damage reduction for 5 seconds")
                     # Add more mappings here for other labels if needed
             except queue.Empty:
                 pass
@@ -514,7 +512,7 @@ def main():
             explosions = [e for e in explosions if e.alive]
 
             player.movement()
-            player.update(pygame.time.get_ticks())  # Update damage reduction
+            player.update(get_time())  # Update damage reduction using absolute time
             player.regenerate_mana(dt)
             weapon.update(dt, player, enemies)
             new_projectile = staff.update(dt, player)

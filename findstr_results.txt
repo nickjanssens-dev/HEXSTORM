@@ -1,0 +1,8 @@
+5:import time
+284:                # Only print occasionally to avoid spam, or just print it if you want real-time logs
+329:    clock = pygame.time.Clock()
+487:                            player.heal_time = time.time()  # Track healing time for green flash
+495:                            player.damage_reduction_end_time = time.time() + 7.5  # 7.5 seconds
+503:                            player.damage_reduction_end_time = time.time() + 5.0  # 5 seconds
+515:            player.update(time.time())  # Update damage reduction using absolute time
+636:            webcam_process.wait(timeout=2)
