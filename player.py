@@ -2,6 +2,7 @@ import math
 import pygame
 
 from map import is_wall
+from controls import CONTROLS
 
 class Player:
     def __init__(self, x, y, angle, speed, rot_speed, health=100, max_mana=2000, mana_regen_rate=50):
@@ -42,28 +43,24 @@ class Player:
         dx = 0
         dy = 0
 
-        # Import CONTROLS from main
-        import main
-        controls = main.CONTROLS
-
         # Movement using CONTROLS dictionary
-        if keys[controls["move_forward"]]:
+        if keys[CONTROLS["move_forward"]]:
             dx += cos_a * self.speed
             dy += sin_a * self.speed
-        if keys[controls["move_backward"]]:
+        if keys[CONTROLS["move_backward"]]:
             dx -= cos_a * self.speed
             dy -= sin_a * self.speed
-        if keys[controls["move_left"]]:
+        if keys[CONTROLS["move_left"]]:
             dx += sin_a * self.speed
             dy -= cos_a * self.speed
-        if keys[controls["move_right"]]:
+        if keys[CONTROLS["move_right"]]:
             dx -= sin_a * self.speed
             dy += cos_a * self.speed
 
         # Turning using CONTROLS dictionary
-        if keys[controls["turn_left"]]:
+        if keys[CONTROLS["turn_left"]]:
             self.angle -= self.rot_speed
-        if keys[controls["turn_right"]]:
+        if keys[CONTROLS["turn_right"]]:
             self.angle += self.rot_speed
 
         self.angle %= math.tau

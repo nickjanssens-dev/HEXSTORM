@@ -124,6 +124,8 @@ from map import get_free_pos, game_map, TILE_SIZE, is_wall
 
 from sprite import Sprite, render_sprites
 
+from controls import CONTROLS
+
 
 
 import subprocess
@@ -159,32 +161,6 @@ DIFFICULTY_EASY = "easy"
 DIFFICULTY_MEDIUM = "medium"
 
 DIFFICULTY_HARD = "hard"
-
-
-
-# Control bindings (default values)
-
-CONTROLS = {
-
-    "move_forward": pygame.K_UP,
-
-    "move_backward": pygame.K_DOWN,
-
-    "move_left": pygame.K_LEFT,
-
-    "move_right": pygame.K_RIGHT,
-
-    "turn_left": pygame.K_s,
-
-    "turn_right": pygame.K_d,
-
-    "shoot": pygame.K_SPACE,
-
-    "spell1": pygame.K_1,
-
-    "spell2": pygame.K_2
-
-}
 
 
 
@@ -1223,6 +1199,8 @@ def main():
                                     CONTROLS[control_key] = event.key
 
                                     print(f"Rebound {control_name} to {pygame.key.name(event.key).upper()}")
+
+                                    print(f"DEBUG: CONTROLS['{control_key}'] is now {pygame.key.name(CONTROLS[control_key])}")
 
                                 rebinding_active = False
 

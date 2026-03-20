@@ -4,6 +4,7 @@ import pygame
 
 import settings
 from map import game_map
+from controls import CONTROLS
 
 class Weapon:
     def __init__(self):
@@ -75,8 +76,8 @@ class Weapon:
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pressed()
         current_time = pygame.time.get_ticks()
-
-        if (keys[pygame.K_SPACE] or mouse[0]) and current_time - self.last_shot_time > self.shoot_cooldown:
+        
+        if (keys[CONTROLS["shoot"]] or mouse[0]) and current_time - self.last_shot_time > self.shoot_cooldown:
             self.is_shooting = True
             self.last_shot_time = current_time
             self.frame_index = 1
