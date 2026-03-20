@@ -49,9 +49,11 @@ data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
 # Timing variables
 confidence_threshold = 0.85
 no_card_threshold = 0.80
+REQUIRED_HOLD_TIME = 0.2  # seconds to hold card before casting (very fast response)
 
 current_class = None
 last_fired_class = None
+class_start_time = None  # Track when current class was first detected
 
 print("Webcam initialized. Press 'esc' to exit.")
 sys.stdout.flush()
@@ -104,16 +106,35 @@ try:
         
         # State machine: ready OR waiting for no card
         if last_fired_class is None:
-            # Ready to fire - detect any card (not "No card") with high confidence
+            # Ready to fire - track card detection timing
             if not is_no_card and confidence_score >= confidence_threshold:
-                # Fire immediately!
-                print(f"\n+++ GAME_RESULT: {class_name_clean} +++")
-                sys.stdout.flush()
-                last_fired_class = class_name_clean
+                if class_start_time is None:
+                    # Start timing when we first detect this card
+                    class_start_time = time.time()
+                    current_class = class_name_clean
+                elif class_name_clean == current_class:
+                    # Same card detected, check if we've held it long enough
+                    held_time = time.time() - class_start_time
+                    if held_time >= REQUIRED_HOLD_TIME:
+                        # Fire after holding for required time
+                        print(f"\n+++ GAME_RESULT: {class_name_clean} +++")
+                        sys.stdout.flush()
+                        last_fired_class = class_name_clean
+                        class_start_time = None  # Reset timing
+                else:
+                    # Different card detected, restart timing
+                    class_start_time = time.time()
+                    current_class = class_name_clean
+            else:
+                # No card detected, reset timing
+                class_start_time = None
+                current_class = None
         else:
             # Waiting for "No card" to reset
             if is_no_card and confidence_score >= no_card_threshold:
                 last_fired_class = None
+                class_start_time = None
+                current_class = None
 
         # Small sleep
         time.sleep(0.01)
