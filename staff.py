@@ -2,6 +2,7 @@ import pygame
 import math
 import os
 import settings
+from time import time as get_time
 from fireball import Fireball
 from ice_shard import IceShard
 
@@ -111,20 +112,18 @@ class Staff:
             return IceShard(spawn_x, spawn_y, angle)
         elif self.current_spell == "Healing touch":
             player.health = player.max_health if hasattr(player, 'max_health') else 100
-            player.heal_time = time.time()  # Track healing time for green flash
+            player.heal_time = get_time()  # Track healing time for green flash
             print(f"Healing touch: Restored to full health!")
             return None
         elif self.current_spell == "Void bulwark":
-            import time
             player.damage_reduction = 1.0  # 100% immunity
-            player.damage_reduction_end_time = time.time() + 15  # 15 seconds
-            print(f"Void bulwark: Immune to damage for 15 seconds")
+            player.damage_reduction_end_time = get_time() + 7.5  # 7.5 seconds
+            print(f"Void bulwark: Immune to damage for 7.5 seconds")
             return None
         elif self.current_spell == "Arcane bulwark":
-            import time
             player.damage_reduction = 0.5  # 50% damage reduction
-            player.damage_reduction_end_time = time.time() + 10  # 10 seconds
-            print(f"Arcane bulwark: 50% damage reduction for 10 seconds")
+            player.damage_reduction_end_time = get_time() + 5.0  # 5 seconds
+            print(f"Arcane bulwark: 50% damage reduction for 5 seconds")
             return None
 
     def cast(self, player):
