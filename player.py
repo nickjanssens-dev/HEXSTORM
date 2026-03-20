@@ -4,17 +4,17 @@ import pygame
 from map import is_wall
 
 class Player:
-    def __init__(self, x, y, angle, speed, rot_speed):
+    def __init__(self, x, y, angle, speed, rot_speed, health=100, max_mana=2000, mana_regen_rate=50):
         self.x = x
         self.y = y
         self.angle = angle
         self.speed = speed
         self.rot_speed = rot_speed
 
-        self.health = 100
-        self.max_mana = 2000
+        self.health = health
+        self.max_mana = max_mana
         self.mana = self.max_mana
-        self.regen_rate = 50 # mana per second
+        self.regen_rate = mana_regen_rate # mana per second
         self.current_spell = "Firebolt"
 
         self.is_moving = False

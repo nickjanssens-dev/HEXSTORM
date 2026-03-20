@@ -75,6 +75,30 @@ STATE_GAME_OVER = "game_over"
 GAME_MODE_NORMAL = "normal"
 GAME_MODE_HARDCORE = "hardcore"  # No minimap or enemy indicator
 
+# Difficulty settings
+DIFFICULTY_EASY = "easy"
+DIFFICULTY_MEDIUM = "medium"
+DIFFICULTY_HARD = "hard"
+
+# Difficulty parameters
+DIFFICULTY_SETTINGS = {
+    DIFFICULTY_EASY: {
+        "health": 500,
+        "max_mana": 5000,
+        "mana_regen_rate": 75  # 1.5x normal (50 * 1.5)
+    },
+    DIFFICULTY_MEDIUM: {
+        "health": 100,
+        "max_mana": 2000,
+        "mana_regen_rate": 50  # Normal rate
+    },
+    DIFFICULTY_HARD: {
+        "health": 50,
+        "max_mana": 1000,
+        "mana_regen_rate": 37.5  # 0.75x normal (50 * 0.75)
+    }
+}
+
 def load_textures():
     wall_texture = pygame.image.load(WALL_TEXTURE_PATH).convert()
     poster_texture = pygame.image.load(POSTER_TEXTURE_PATH).convert()
@@ -226,11 +250,12 @@ def draw_game_over(screen):
     screen.blit(game_over_text, game_over_rect)
     screen.blit(restart_text, restart_rect)
 
-def draw_menu(screen, background, selected_option, menu_options):
+def draw_menu(screen, background, selected_option, menu_options, menu_level="main", selected_difficulty_option=1):
     screen.blit(background, (0, 0))
 
     title_font = pygame.font.SysFont("Times New Roman", 84, bold=True)
     option_font = pygame.font.SysFont("Arial", 42, bold=True)
+    small_font = pygame.font.SysFont("Arial", 24)
 
     # Optional dark overlay to make text easier to read
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -241,33 +266,80 @@ def draw_menu(screen, background, selected_option, menu_options):
     title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 140))
     screen.blit(title_text, title_rect)
 
-    start_y = SCREEN_HEIGHT // 2 + 30
-    spacing = 80
+    if menu_level == "main":
+        # Main menu
+        start_y = SCREEN_HEIGHT // 2 + 30
+        spacing = 80
 
-    for i, option in enumerate(menu_options):
-        if i == selected_option:
-            color = (255, 210, 100)
-        else:
-            color = (230, 230, 230)
+        for i, option in enumerate(menu_options):
+            if i == selected_option:
+                color = (255, 210, 100)
+            else:
+                color = (230, 230, 230)
 
-        text = option_font.render(option, True, color)
-        rect = text.get_rect(center=(SCREEN_WIDTH // 2, start_y + i * spacing))
-        screen.blit(text, rect)
+            text = option_font.render(option, True, color)
+            rect = text.get_rect(center=(SCREEN_WIDTH // 2, start_y + i * spacing))
+            screen.blit(text, rect)
 
-    hint_font = pygame.font.SysFont("Arial", 22)
-    hint_text = hint_font.render("Use UP / DOWN and ENTER", True, (220, 220, 220))
-    hint_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 60))
-    screen.blit(hint_text, hint_rect)
+        hint_text = small_font.render("Use UP / DOWN and ENTER", True, (220, 220, 220))
+        hint_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 60))
+        screen.blit(hint_text, hint_rect)
+    
+    elif menu_level == "difficulty":
+        # Difficulty selection menu
+        difficulty_options = ["EASY", "MEDIUM", "HARD"]
+        difficulty_descriptions = [
+            "500 HP, 5000 Mana, 1.5x Regen",
+            "100 HP, 2000 Mana, Normal Regen", 
+            "50 HP, 1000 Mana, 0.75x Regen"
+        ]
+        
+        start_y = SCREEN_HEIGHT // 2 - 50
+        spacing = 60
 
-def reset_game(game_mode=GAME_MODE_NORMAL):
+        # Title
+        diff_title = option_font.render("SELECT DIFFICULTY", True, (255, 255, 255))
+        diff_title_rect = diff_title.get_rect(center=(SCREEN_WIDTH // 2, start_y - 80))
+        screen.blit(diff_title, diff_title_rect)
+
+        for i, (option, description) in enumerate(zip(difficulty_options, difficulty_descriptions)):
+            if i == selected_difficulty_option:
+                color = (255, 210, 100)
+                # Draw box around selected option
+                box_rect = pygame.Rect(SCREEN_WIDTH // 2 - 200, start_y + i * spacing - 10, 400, 50)
+                pygame.draw.rect(screen, color, box_rect, 2)
+            else:
+                color = (230, 230, 230)
+
+            # Option text
+            text = option_font.render(option, True, color)
+            text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, start_y + i * spacing))
+            screen.blit(text, text_rect)
+            
+            # Description text
+            desc_text = small_font.render(description, True, color)
+            desc_rect = desc_text.get_rect(center=(SCREEN_WIDTH // 2, start_y + i * spacing + 25))
+            screen.blit(desc_text, desc_rect)
+
+        hint_text = small_font.render("Use UP / DOWN to select, ENTER to confirm, ESC to go back", True, (220, 220, 220))
+        hint_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 60))
+        screen.blit(hint_text, hint_rect)
+
+def reset_game(game_mode=GAME_MODE_NORMAL, difficulty=DIFFICULTY_MEDIUM):
     start_x, start_y = get_free_pos()
+
+    # Get difficulty settings
+    diff_settings = DIFFICULTY_SETTINGS[difficulty]
 
     player = Player(
         start_x,
         start_y,
         PLAYER_ANGLE,
         PLAYER_SPEED,
-        PLAYER_ROT_SPEED
+        PLAYER_ROT_SPEED,
+        diff_settings["health"],
+        diff_settings["max_mana"],
+        diff_settings["mana_regen_rate"]
     )
 
     # Share a used_tiles set so decor sprites and enemies never land on the same tile
@@ -282,7 +354,7 @@ def reset_game(game_mode=GAME_MODE_NORMAL):
     projectiles = []
     kills = 0
 
-    return player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode
+    return player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode, difficulty
 
 def toggle_fullscreen(screen):
     if screen.get_flags() & pygame.FULLSCREEN:
@@ -358,10 +430,15 @@ def main():
     textures, sky_texture, grass_texture = load_textures()
     menu_background = load_menu_background()
 
-    player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode = reset_game()
+    player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode, difficulty = reset_game()
 
     game_state = STATE_MENU
-    menu_options = ["PLAY", "HARDCORE", "QUIT"]
+    # Create two-level menu system
+    menu_level = "main"  # "main" or "difficulty"
+    selected_main_option = 0
+    selected_difficulty_option = 1  # Default to medium
+    main_options = ["PLAY", "HARDCORE", "QUIT"]
+    difficulty_options = ["EASY", "MEDIUM", "HARD"]
     selected_option = 0
 
     running = True
@@ -418,33 +495,59 @@ def main():
                     screen = toggle_fullscreen(screen)
 
                 elif game_state == STATE_MENU:
-                    if event.key == pygame.K_UP:
-                        selected_option = (selected_option - 1) % len(menu_options)
+                    if menu_level == "main":
+                        if event.key == pygame.K_UP:
+                            selected_main_option = (selected_main_option - 1) % len(main_options)
+                            selected_option = selected_main_option  # Update selected_option for display
 
-                    elif event.key == pygame.K_DOWN:
-                        selected_option = (selected_option + 1) % len(menu_options)
+                        elif event.key == pygame.K_DOWN:
+                            selected_main_option = (selected_main_option + 1) % len(main_options)
+                            selected_option = selected_main_option  # Update selected_option for display
 
-                    elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
-                        choice = menu_options[selected_option]
+                        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                            choice = main_options[selected_main_option]
 
-                        if choice == "PLAY":
-                            game_mode = GAME_MODE_NORMAL
-                            player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode = reset_game(game_mode)
+                            if choice == "PLAY":
+                                menu_level = "difficulty"
+                                selected_option = selected_difficulty_option
+
+                            elif choice == "HARDCORE":
+                                menu_level = "difficulty"
+                                selected_option = selected_difficulty_option
+
+                            elif choice == "QUIT":
+                                running = False
+
+                    elif menu_level == "difficulty":
+                        if event.key == pygame.K_UP:
+                            selected_difficulty_option = (selected_difficulty_option - 1) % len(difficulty_options)
+                            selected_option = selected_difficulty_option
+
+                        elif event.key == pygame.K_DOWN:
+                            selected_difficulty_option = (selected_difficulty_option + 1) % len(difficulty_options)
+                            selected_option = selected_difficulty_option
+
+                        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                            difficulty_name = difficulty_options[selected_difficulty_option]
+                            difficulty_map = {
+                                "EASY": DIFFICULTY_EASY,
+                                "MEDIUM": DIFFICULTY_MEDIUM,
+                                "HARD": DIFFICULTY_HARD
+                            }
+                            selected_difficulty = difficulty_map[difficulty_name]
+                            
+                            # Start game with selected settings
+                            game_mode = GAME_MODE_NORMAL if selected_main_option == 0 else GAME_MODE_HARDCORE
+                            player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode, difficulty = reset_game(game_mode, selected_difficulty)
                             game_state = STATE_PLAYING
                             # Play no-mercy over the soundtrack (separate channel)
                             if no_mercy_sound:
                                 no_mercy_sound.play()
 
-                        elif choice == "HARDCORE":
-                            game_mode = GAME_MODE_HARDCORE
-                            player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode = reset_game(game_mode)
-                            game_state = STATE_PLAYING
-                            # Play no-mercy over the soundtrack (separate channel)
-                            if no_mercy_sound:
-                                no_mercy_sound.play()
-
-                        elif choice == "QUIT":
-                            running = False
+                        elif event.key == pygame.K_ESCAPE:
+                            # Go back to main menu
+                            menu_level = "main"
+                            selected_option = selected_main_option
 
                 elif game_state == STATE_PLAYING:
                     if event.key == pygame.K_1:
@@ -458,7 +561,7 @@ def main():
 
                 elif game_state == STATE_GAME_OVER:
                     if event.key == pygame.K_r:
-                        player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode = reset_game(game_mode)
+                        player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode, difficulty = reset_game(game_mode, difficulty)
                         game_state = STATE_PLAYING
 
         # Check for spells from the webcam
@@ -626,7 +729,7 @@ def main():
                         game_over_sound.play()
 
         if game_state == STATE_MENU:
-            draw_menu(screen, menu_background, selected_option, menu_options)
+            draw_menu(screen, menu_background, selected_option, main_options, menu_level, selected_difficulty_option)
 
         elif game_state == STATE_PLAYING:
             draw_background(screen, sky_texture, grass_texture, player)
