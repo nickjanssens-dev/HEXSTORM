@@ -91,10 +91,7 @@ class Player:
                 self.shield = 0
 
         self.health -= amount
-
-        # Optional: clamp
-        if self.health < 0:
-            self.health = 0
+        self.health = max(0, int(self.health))
 
         # Death handling
         if self.health == 0:
