@@ -71,6 +71,10 @@ STATE_MENU = "menu"
 STATE_PLAYING = "playing"
 STATE_GAME_OVER = "game_over"
 
+# Game modes
+GAME_MODE_NORMAL = "normal"
+GAME_MODE_HARDCORE = "hardcore"  # No minimap or enemy indicator
+
 def load_textures():
     wall_texture = pygame.image.load(WALL_TEXTURE_PATH).convert()
     poster_texture = pygame.image.load(POSTER_TEXTURE_PATH).convert()
@@ -255,7 +259,7 @@ def draw_menu(screen, background, selected_option, menu_options):
     hint_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 60))
     screen.blit(hint_text, hint_rect)
 
-def reset_game():
+def reset_game(game_mode=GAME_MODE_NORMAL):
     start_x, start_y = get_free_pos()
 
     player = Player(
@@ -278,7 +282,7 @@ def reset_game():
     projectiles = []
     kills = 0
 
-    return player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills
+    return player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode
 
 def toggle_fullscreen(screen):
     if screen.get_flags() & pygame.FULLSCREEN:
@@ -354,10 +358,10 @@ def main():
     textures, sky_texture, grass_texture = load_textures()
     menu_background = load_menu_background()
 
-    player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills = reset_game()
+    player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode = reset_game()
 
     game_state = STATE_MENU
-    menu_options = ["PLAY", "QUIT"]
+    menu_options = ["PLAY", "HARDCORE", "QUIT"]
     selected_option = 0
 
     running = True
@@ -424,7 +428,16 @@ def main():
                         choice = menu_options[selected_option]
 
                         if choice == "PLAY":
-                            player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills = reset_game()
+                            game_mode = GAME_MODE_NORMAL
+                            player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode = reset_game(game_mode)
+                            game_state = STATE_PLAYING
+                            # Play no-mercy over the soundtrack (separate channel)
+                            if no_mercy_sound:
+                                no_mercy_sound.play()
+
+                        elif choice == "HARDCORE":
+                            game_mode = GAME_MODE_HARDCORE
+                            player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode = reset_game(game_mode)
                             game_state = STATE_PLAYING
                             # Play no-mercy over the soundtrack (separate channel)
                             if no_mercy_sound:
@@ -445,7 +458,7 @@ def main():
 
                 elif game_state == STATE_GAME_OVER:
                     if event.key == pygame.K_r:
-                        player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills = reset_game()
+                        player, sprites, enemies, explosions, weapon, staff, projectiles, wave, kills, game_mode = reset_game(game_mode)
                         game_state = STATE_PLAYING
 
         # Check for spells from the webcam
@@ -629,7 +642,7 @@ def main():
 
             weapon.draw(screen)
             staff.draw(screen)
-            draw_hud(screen, player, wave=wave, kills=kills, game_over=False, enemies=enemies)
+            draw_hud(screen, player, wave=wave, kills=kills, game_over=False, enemies=enemies, game_mode=game_mode)
 
         elif game_state == STATE_GAME_OVER:
             draw_background(screen, sky_texture, grass_texture, player)
@@ -645,7 +658,7 @@ def main():
 
             weapon.draw(screen)
             staff.draw(screen)
-            draw_hud(screen, player, wave=wave, kills=kills, game_over=True, enemies=enemies)
+            draw_hud(screen, player, wave=wave, kills=kills, game_over=True, enemies=enemies, game_mode=game_mode)
             draw_game_over(screen)
 
         pygame.display.flip()

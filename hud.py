@@ -103,14 +103,16 @@ def draw_minimap(screen, player, enemies):
         dir_y = map_y + py * tile_size + tile_size // 2 + math.sin(player.angle) * line_len
         pygame.draw.line(screen, (50, 255, 50), (map_x + px * tile_size + tile_size // 2, map_y + py * tile_size + tile_size // 2), (dir_x, dir_y), 2)
 
-def draw_hud(screen, player, wave=None, kills=None, game_over=False, enemies=None):
+def draw_hud(screen, player, wave=None, kills=None, game_over=False, enemies=None, game_mode="normal"):
     import settings
     import math
     import time
     hud_x = 0
     hud_y = settings.SCREEN_HEIGHT - HUD_HEIGHT
 
-    draw_minimap(screen, player, enemies)
+    # Only draw minimap in normal mode
+    if game_mode == "normal":
+        draw_minimap(screen, player, enemies)
 
     screen.blit(HUD_IMAGE, (hud_x, hud_y))
 
@@ -154,7 +156,8 @@ def draw_hud(screen, player, wave=None, kills=None, game_over=False, enemies=Non
     draw_fullscreen_button(screen)
 
     # --- Draw Compass to Closest Enemy ---
-    if enemies:
+    # Only show in normal mode
+    if game_mode == "normal" and enemies:
         closest_enemy = None
         min_dist = float('inf')
         for e in enemies:
@@ -202,6 +205,12 @@ def draw_hud(screen, player, wave=None, kills=None, game_over=False, enemies=Non
         kills_text = font.render(f"KILLS: {kills}", True, (255, 255, 255))
         screen.blit(wave_text, (20, 20))
         screen.blit(kills_text, (20, 50))
+        
+        # Draw game mode indicator
+        mode_text = "HARDCORE" if game_mode == "hardcore" else "NORMAL"
+        mode_color = (255, 100, 100) if game_mode == "hardcore" else (100, 255, 100)
+        mode_display = font.render(f"MODE: {mode_text}", True, mode_color)
+        screen.blit(mode_display, (20, 80))
 
     # --- Game Over Overlay ---
     if game_over:
